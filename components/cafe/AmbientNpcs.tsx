@@ -77,6 +77,22 @@ export function AmbientNpcs({ tileSize }: AmbientNpcsProps) {
               )}
             </AnimatePresence>
 
+            {/* 왕관 (생일 당사자 전용) */}
+            {npc.isBirthday && (
+              <div
+                className="absolute flex justify-center pointer-events-none"
+                style={{ left: 0, width: '100%', top: tileSize * 0.02 }}
+              >
+                <motion.span
+                  style={{ fontSize: tileSize * 0.32, lineHeight: 1 }}
+                  animate={{ y: [0, -2, 0] }}
+                  transition={{ duration: 1.8, repeat: Infinity, ease: 'easeInOut' }}
+                >
+                  👑
+                </motion.span>
+              </div>
+            )}
+
             {/* 말 걸기 인디케이터 (말풍선 없을 때만) */}
             {isNearby && !showBubble && (
               <motion.div
@@ -94,9 +110,11 @@ export function AmbientNpcs({ tileSize }: AmbientNpcsProps) {
               style={{
                 fontSize: tileSize * 0.62,
                 lineHeight: 1,
-                filter: npc.gender === 'female'
-                  ? 'hue-rotate(280deg) saturate(2)'
-                  : undefined,
+                filter: npc.isBirthday
+                  ? 'hue-rotate(310deg) saturate(3) brightness(1.15)'
+                  : npc.gender === 'female'
+                    ? 'hue-rotate(280deg) saturate(2)'
+                    : undefined,
               }}
               animate={{ rotate: DIR_ROTATE[npc.direction] }}
               transition={{ duration: 0.15 }}
@@ -109,10 +127,12 @@ export function AmbientNpcs({ tileSize }: AmbientNpcsProps) {
               <div
                 className={[
                   'absolute -bottom-4 left-1/2 -translate-x-1/2',
-                  'rounded-full px-1.5 whitespace-nowrap shadow-sm transition-colors',
+                  'rounded-full px-1.5 whitespace-nowrap shadow-sm transition-colors font-semibold',
                   isNearby
                     ? 'bg-amber-300/90 text-stone-900'
-                    : 'bg-white/80 text-stone-700',
+                    : npc.isBirthday
+                      ? 'bg-pink-300/90 text-stone-900'
+                      : 'bg-white/80 text-stone-700',
                 ].join(' ')}
                 style={{ fontSize: Math.max(7, tileSize * 0.17) }}
               >

@@ -2,19 +2,23 @@ export type Direction = 'up' | 'down' | 'left' | 'right';
 
 export type TileType =
   | 'floor'
+  | 'blocked'
+  | 'billboard'
+  | 'frame'
+  | 'letter_tree'
+  | 'photobooth'
+  | 'jukebox'
+  | 'cake'
+  | 'goods'
+  | 'gacha'
+  | 'easter'
+  // legacy (이전 맵 호환)
   | 'floor_rug'
   | 'floor_party'
   | 'wall'
   | 'wall_top'
   | 'counter'
-  | 'cake'
-  | 'frame'
   | 'tree'
-  | 'goods'
-  | 'gacha'
-  | 'billboard'
-  | 'jukebox'
-  | 'photobooth'
   | 'menu_board'
   | 'letter_board'
   | 'table'
@@ -29,6 +33,7 @@ export interface AmbientNpcConfig {
   gender: CharacterGender;
   waypoints: Position[];
   dialogue: string;
+  isBirthday?: boolean;
 }
 
 export interface AmbientNpcState extends AmbientNpcConfig {
@@ -54,15 +59,18 @@ export type ModalType =
 
 export type ObjectType =
   | 'frame'
-  | 'counter'
+  | 'letter_tree'
+  | 'photobooth'
+  | 'jukebox'
   | 'cake'
-  | 'tree'
   | 'goods'
   | 'gacha'
   | 'billboard'
+  | 'easter'
+  // legacy
+  | 'counter'
+  | 'tree'
   | 'npc'
-  | 'jukebox'
-  | 'photobooth'
   | 'menu_board'
   | 'letter_board';
 

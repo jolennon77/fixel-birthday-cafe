@@ -19,7 +19,7 @@ const INITIAL_STATE: AmbientNpcState[] = AMBIENT_NPC_CONFIGS.map((cfg) => ({
 }));
 
 const MOVE_INTERVAL = 6000; // NPC 이동 간격 (ms) — 느리게 해서 말걸기 편하게
-const OFFSETS       = [0, 2000, 4000]; // 각 NPC 출발 딜레이
+const OFFSETS       = [0, 1000, 3000, 5000]; // 각 NPC 출발 딜레이
 
 export function useAmbientNpcs(): AmbientNpcState[] {
   const [npcs, setNpcs] = useState<AmbientNpcState[]>(INITIAL_STATE);

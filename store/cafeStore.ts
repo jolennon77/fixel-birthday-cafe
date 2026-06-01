@@ -73,15 +73,17 @@ function getNearbyNpc(
 
 const MODAL_MAP: Record<string, NonNullable<ModalType>> = {
   frame:        'gallery',
-  counter:      'receipt',
-  tree:         'guestbook',
+  letter_tree:  'guestbook',
+  photobooth:   'photobooth',
+  jukebox:      'jukebox',
   cake:         'candle',
   goods:        'goods',
-  billboard:    'billboard',
-  npc:          'npc',
-  jukebox:      'jukebox',
-  photobooth:   'photobooth',
   gacha:        'gacha',
+  billboard:    'billboard',
+  // legacy
+  counter:      'receipt',
+  tree:         'guestbook',
+  npc:          'npc',
   menu_board:   'menu',
   letter_board: 'letter',
 };

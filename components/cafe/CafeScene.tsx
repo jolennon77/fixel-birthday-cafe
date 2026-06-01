@@ -25,19 +25,24 @@ import { MAP_COLS, MAP_ROWS, TILE_SIZE } from '@/data/mapLayout';
 const MOBILE_BREAKPOINT = 768;
 
 function useTileSize() {
-  const [tileSize, setTileSize] = useState(TILE_SIZE);
-  const [isMobile, setIsMobile] = useState(false);
+  const [tileSize, setTileSize]       = useState(TILE_SIZE);
+  const [isMobile, setIsMobile]       = useState(false);
+  const [isLandscape, setIsLandscape] = useState(false);
 
   useEffect(() => {
     const calc = () => {
       const vw = window.innerWidth;
       const vh = window.innerHeight;
-      const mobile = vw < MOBILE_BREAKPOINT;
+      const mobile    = Math.min(vw, vh) < MOBILE_BREAKPOINT;
+      const landscape = vw > vh;
       setIsMobile(mobile);
+      setIsLandscape(landscape);
 
       if (mobile) {
+        // 가로 모드: D-pad가 맵 위에 오버레이되므로 전체 화면 활용
+        const dpadReserve = landscape ? 16 : 160;
         const maxTileW = Math.floor((vw - 8) / MAP_COLS);
-        const maxTileH = Math.floor((vh - 160) / MAP_ROWS);
+        const maxTileH = Math.floor((vh - dpadReserve) / MAP_ROWS);
         setTileSize(Math.max(24, Math.min(maxTileW, maxTileH)));
       } else {
         const maxTileW = Math.floor((vw * 0.9) / MAP_COLS);
@@ -50,13 +55,13 @@ function useTileSize() {
     return () => window.removeEventListener('resize', calc);
   }, []);
 
-  return { tileSize, isMobile };
+  return { tileSize, isMobile, isLandscape };
 }
 
 export function CafeScene() {
   const { position, direction, activeModal, move, triggerInteraction, playerInfo } =
     useCafeStore();
-  const { tileSize, isMobile } = useTileSize();
+  const { tileSize, isMobile, isLandscape } = useTileSize();
   const viewportRef = useRef<HTMLDivElement>(null);
 
   useKeyboard({
@@ -91,7 +96,7 @@ export function CafeScene() {
         className="relative overflow-hidden"
         style={{
           width: '100vw',
-          height: isMobile ? `calc(100vh - 160px)` : '100vh',
+          height: isMobile && !isLandscape ? `calc(100vh - 160px)` : '100vh',
           scrollbarWidth: 'none',
           msOverflowStyle: 'none',
         }}
@@ -101,7 +106,7 @@ export function CafeScene() {
           style={{ width: mapWidth, height: mapHeight, margin: '0 auto' }}
         >
           <TileMap playerPosition={position} tileSize={tileSize} />
-          <AmbientNpcs tileSize={tileSize} />
+          {/* <AmbientNpcs tileSize={tileSize} /> */}
           <Character
             position={position}
             direction={direction}

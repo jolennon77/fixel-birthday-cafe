@@ -6,7 +6,9 @@
       "Bash(npx tsc *)",
       "Bash(npm run *)",
       "Bash(npx playwright *)",
-      "Bash(node *)"
+      "Bash(node *)",
+      "Bash(Get-ChildItem C:projectnami-birthdaypublic *)",
+      "Bash(Remove-Item *)"
     ]
   }
 }

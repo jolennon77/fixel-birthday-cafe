@@ -1,0 +1,533 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<title>카페 맵 에디터</title>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  font-family: 'Courier New', monospace;
+  background: #0f0f1e;
+  color: #dde;
+  display: flex;
+  height: 100vh;
+  overflow: hidden;
+}
+
+#sidebar {
+  width: 230px;
+  min-width: 230px;
+  background: #13132a;
+  padding: 12px 10px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+  border-right: 1px solid #2a2a4a;
+}
+
+#canvas-area {
+  flex: 1;
+  overflow: auto;
+  padding: 16px;
+  background: #0a0a18;
+}
+
+canvas { cursor: crosshair; display: block; }
+
+h1 { font-size: 13px; color: #adf; letter-spacing: 1px; }
+
+.section-title {
+  font-size: 9px;
+  color: #556;
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+  padding: 4px 0 1px;
+}
+
+.divider { border: none; border-top: 1px solid #1c1c38; }
+
+/* ── Tile buttons ── */
+.tile-group { display: flex; flex-direction: column; gap: 2px; }
+
+.tile-btn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 8px;
+  border: 1px solid #222240;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 10px;
+  font-family: monospace;
+  background: #161628;
+  color: #aab;
+  width: 100%;
+  text-align: left;
+  transition: border-color 0.1s, background 0.1s;
+}
+.tile-btn:hover { border-color: #3a3a70; background: #1c1c38; }
+.tile-btn.active {
+  border-color: #55aaff;
+  background: #1a2a50;
+  color: #fff;
+  font-weight: bold;
+}
+
+.color-dot {
+  width: 13px; height: 13px;
+  border-radius: 3px;
+  flex-shrink: 0;
+  border: 1px solid rgba(255,255,255,0.18);
+}
+
+.key-badge {
+  margin-left: auto;
+  background: #0d0d22;
+  color: #778;
+  padding: 0 4px;
+  border-radius: 2px;
+  font-size: 9px;
+  border: 1px solid #2a2a44;
+}
+.tile-btn.active .key-badge { color: #9af; border-color: #3a5a88; }
+
+/* ── Info + controls ── */
+#coord-display {
+  font-size: 11px; color: #ffd;
+  background: #1a1a30;
+  padding: 5px 8px;
+  border-radius: 3px;
+  border: 1px solid #2a2a4a;
+  min-height: 28px;
+}
+
+.action-btn {
+  padding: 7px 10px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-family: monospace;
+  font-size: 11px;
+  font-weight: bold;
+  width: 100%;
+  border: 1px solid;
+}
+#export-btn { background: #1a3a28; color: #7effc8; border-color: #2a6a48; }
+#export-btn:hover { background: #1f4a30; }
+#undo-btn   { background: #1a2a3a; color: #88ccff; border-color: #2a4a6a; }
+#undo-btn:hover { background: #1f3345; }
+#reset-btn  { background: #3a1a1a; color: #ff9999; border-color: #6a2a2a; font-size: 10px; }
+#reset-btn:hover { background: #451f1f; }
+
+.toggle-row {
+  display: flex; align-items: center; gap: 6px;
+  font-size: 10px; color: #778; cursor: pointer;
+}
+.toggle-row input { cursor: pointer; accent-color: #55aaff; }
+
+.help-text { font-size: 9px; color: #445; line-height: 1.6; }
+
+#output-area {
+  background: #080814;
+  border: 1px solid #2a2a4a;
+  border-radius: 4px;
+  padding: 8px;
+  font-size: 9px;
+  color: #7ef7a0;
+  white-space: pre;
+  overflow: auto;
+  max-height: 160px;
+  display: none;
+}
+
+#file-input {
+  width: 100%; padding: 5px;
+  background: #161628;
+  border: 1px solid #2a2a4a;
+  color: #aaa;
+  border-radius: 3px;
+  font-size: 10px;
+  cursor: pointer;
+}
+</style>
+</head>
+<body>
+
+<div id="sidebar">
+  <h1>🗺 카페 맵 에디터</h1>
+
+  <input type="file" id="file-input" accept="image/*">
+
+  <hr class="divider">
+  <div id="coord-display">마우스를 캔버스 위에 올리세요</div>
+  <hr class="divider">
+
+  <!-- FLOOR / BLOCKED -->
+  <div class="section-title">바닥 타입</div>
+  <div class="tile-group" id="group-floor"></div>
+
+  <!-- OBJECTS -->
+  <div class="section-title">오브젝트</div>
+  <div class="tile-group" id="group-objects"></div>
+
+  <!-- EASTER EGGS -->
+  <div class="section-title">🥚 이스터에그</div>
+  <div class="tile-group" id="group-easter"></div>
+
+  <hr class="divider">
+
+  <label class="toggle-row"><input type="checkbox" id="show-grid"   checked> 격자선</label>
+  <label class="toggle-row"><input type="checkbox" id="show-coords" checked> 좌표</label>
+  <label class="toggle-row"><input type="checkbox" id="show-labels" checked> 타일명</label>
+
+  <hr class="divider">
+  <div class="help-text">
+    좌클릭 / 드래그 : 타일 칠하기<br>
+    우클릭 : Floor 초기화<br>
+    Ctrl+Z : 실행 취소<br>
+    숫자키 1~0, Q~T : 단축키
+  </div>
+
+  <button class="action-btn" id="undo-btn">↩ 실행취소 (Ctrl+Z)</button>
+  <button class="action-btn" id="reset-btn">🗑 전체 초기화</button>
+
+  <hr class="divider">
+  <button class="action-btn" id="export-btn">📋 mapLayout.ts 코드 복사</button>
+  <div id="output-area"></div>
+</div>
+
+<div id="canvas-area">
+  <canvas id="mapCanvas"></canvas>
+</div>
+
+<script>
+const COLS = 16, ROWS = 12, CELL = 62;
+
+// ──────────────────────────────────────────────
+//  TILE DEFINITIONS
+// ──────────────────────────────────────────────
+const TILES = {
+  // 바닥
+  floor:   { label: '이동 가능 (Floor)',  short: 'F',   walkable: true,  group: 'floor',
+             bg: 'rgba(255,255,255,0.04)', solid: '#4488cc', key: '1' },
+  blocked: { label: '이동 불가 (Blocked)',short: 'X',   walkable: false, group: 'floor',
+             bg: 'rgba(0,0,20,0.65)',      solid: '#334466', key: '2' },
+
+  // 오브젝트
+  billboard:    { label: '카운트다운 전광판', short: 'BL', walkable: false, group: 'objects',
+                  bg: 'rgba(50,130,255,0.6)',   solid: '#3388ff', key: '3' },
+  frame:        { label: '벽 액자',           short: 'FR', walkable: false, group: 'objects',
+                  bg: 'rgba(220,190,60,0.6)',   solid: '#ddbb33', key: '4' },
+  letter_tree:  { label: '편지 트리',          short: 'LT', walkable: false, group: 'objects',
+                  bg: 'rgba(50,200,80,0.6)',    solid: '#33cc55', key: '5' },
+  photobooth:   { label: '포토부스',            short: 'PB', walkable: false, group: 'objects',
+                  bg: 'rgba(60,220,220,0.6)',   solid: '#33cccc', key: '6' },
+  jukebox:      { label: '주크박스',            short: 'JK', walkable: false, group: 'objects',
+                  bg: 'rgba(220,170,40,0.65)',  solid: '#ddaa22', key: '7' },
+  cake:         { label: '케이크',              short: 'CK', walkable: false, group: 'objects',
+                  bg: 'rgba(255,100,150,0.65)', solid: '#ff4488', key: '8' },
+  goods:        { label: '굿즈 전시대',         short: 'GD', walkable: false, group: 'objects',
+                  bg: 'rgba(160,90,230,0.65)',  solid: '#9955ee', key: '9' },
+  gacha:        { label: '가챠 머신',           short: 'GA', walkable: false, group: 'objects',
+                  bg: 'rgba(230,50,190,0.65)',  solid: '#ee33bb', key: '0' },
+
+  // 이스터에그
+  easter_1: { label: '이스터에그 1', short: 'E1', walkable: true, group: 'easter',
+              bg: 'rgba(255,220,50,0.5)',  solid: '#ffcc22', key: 'Q' },
+  easter_2: { label: '이스터에그 2', short: 'E2', walkable: true, group: 'easter',
+              bg: 'rgba(255,150,50,0.5)',  solid: '#ff8822', key: 'W' },
+  easter_3: { label: '이스터에그 3', short: 'E3', walkable: true, group: 'easter',
+              bg: 'rgba(100,255,200,0.5)', solid: '#44ffbb', key: 'E' },
+  easter_4: { label: '이스터에그 4', short: 'E4', walkable: true, group: 'easter',
+              bg: 'rgba(200,100,255,0.5)', solid: '#bb44ff', key: 'R' },
+  easter_5: { label: '이스터에그 5', short: 'E5', walkable: true, group: 'easter',
+              bg: 'rgba(255,80,80,0.5)',   solid: '#ff4444', key: 'T' },
+};
+
+const TYPE_KEYS = Object.keys(TILES);
+
+// ──────────────────────────────────────────────
+//  STATE
+// ──────────────────────────────────────────────
+let grid        = Array.from({ length: ROWS }, () => Array(COLS).fill('floor'));
+let selectedType = 'floor';
+let bgImage      = null;
+let isDragging   = false;
+let history      = [];
+let opts         = { grid: true, coords: true, labels: true };
+
+const canvas = document.getElementById('mapCanvas');
+const ctx    = canvas.getContext('2d');
+canvas.width  = COLS * CELL;
+canvas.height = ROWS * CELL;
+
+// ──────────────────────────────────────────────
+//  BUILD SIDEBAR BUTTONS
+// ──────────────────────────────────────────────
+const groups = { floor: 'group-floor', objects: 'group-objects', easter: 'group-easter' };
+
+TYPE_KEYS.forEach(key => {
+  const t   = TILES[key];
+  const btn = document.createElement('button');
+  btn.className   = 'tile-btn' + (key === 'floor' ? ' active' : '');
+  btn.dataset.type = key;
+
+  const dot = document.createElement('span');
+  dot.className    = 'color-dot';
+  dot.style.background = t.solid;
+
+  const lbl  = document.createTextNode(`${t.short} — ${t.label}`);
+  const badge = document.createElement('span');
+  badge.className = 'key-badge';
+  badge.textContent = t.key;
+
+  btn.appendChild(dot);
+  btn.appendChild(lbl);
+  btn.appendChild(badge);
+  btn.addEventListener('click', () => selectType(key));
+
+  document.getElementById(groups[t.group]).appendChild(btn);
+});
+
+function selectType(key) {
+  selectedType = key;
+  document.querySelectorAll('.tile-btn').forEach(b => b.classList.remove('active'));
+  document.querySelector(`[data-type="${key}"]`).classList.add('active');
+}
+
+// ──────────────────────────────────────────────
+//  DRAW
+// ──────────────────────────────────────────────
+function draw() {
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+  if (bgImage) {
+    ctx.drawImage(bgImage, 0, 0, canvas.width, canvas.height);
+  } else {
+    ctx.fillStyle = '#1a1a30';
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    ctx.fillStyle = '#2a2a50';
+    ctx.font = '13px monospace';
+    ctx.textAlign = 'center';
+    ctx.fillText('← 카페 이미지를 불러오세요', canvas.width / 2, canvas.height / 2);
+  }
+
+  // Tile overlays
+  for (let r = 0; r < ROWS; r++) {
+    for (let c = 0; c < COLS; c++) {
+      const type = grid[r][c];
+      const x = c * CELL, y = r * CELL;
+      if (type !== 'floor' || !bgImage) {
+        ctx.fillStyle = TILES[type].bg;
+        ctx.fillRect(x, y, CELL, CELL);
+      }
+    }
+  }
+
+  // Grid lines
+  if (opts.grid) {
+    ctx.strokeStyle = 'rgba(255,255,255,0.20)';
+    ctx.lineWidth = 0.7;
+    for (let c = 0; c <= COLS; c++) {
+      ctx.beginPath(); ctx.moveTo(c * CELL, 0); ctx.lineTo(c * CELL, canvas.height); ctx.stroke();
+    }
+    for (let r = 0; r <= ROWS; r++) {
+      ctx.beginPath(); ctx.moveTo(0, r * CELL); ctx.lineTo(canvas.width, r * CELL); ctx.stroke();
+    }
+  }
+
+  // Labels + coords
+  for (let r = 0; r < ROWS; r++) {
+    for (let c = 0; c < COLS; c++) {
+      const type = grid[r][c];
+      const cx = c * CELL + CELL / 2;
+      const cy = r * CELL + CELL / 2;
+      const isBg = type === 'floor' && bgImage;
+
+      if (opts.labels) {
+        ctx.fillStyle = isBg ? 'rgba(255,255,255,0.3)' : 'rgba(255,255,255,0.92)';
+        ctx.font = 'bold 10px monospace';
+        ctx.textAlign = 'center';
+        ctx.fillText(TILES[type].short, cx, cy + (opts.coords ? -3 : 4));
+      }
+      if (opts.coords) {
+        ctx.fillStyle = isBg ? 'rgba(180,210,255,0.35)' : 'rgba(180,210,255,0.7)';
+        ctx.font = '8px monospace';
+        ctx.textAlign = 'center';
+        ctx.fillText(`${c},${r}`, cx, cy + (opts.labels ? 10 : 4));
+      }
+    }
+  }
+}
+
+// ──────────────────────────────────────────────
+//  INTERACTION
+// ──────────────────────────────────────────────
+function getCell(e) {
+  const rect = canvas.getBoundingClientRect();
+  const col = Math.floor((e.clientX - rect.left) * (canvas.width  / rect.width)  / CELL);
+  const row = Math.floor((e.clientY - rect.top)  * (canvas.height / rect.height) / CELL);
+  return (col >= 0 && col < COLS && row >= 0 && row < ROWS) ? { col, row } : null;
+}
+
+function paint(col, row, type) {
+  if (grid[row][col] === type) return;
+  history.push({ col, row, prev: grid[row][col] });
+  if (history.length > 600) history.shift();
+  grid[row][col] = type;
+  draw();
+}
+
+canvas.addEventListener('mousedown', e => {
+  e.preventDefault(); isDragging = true;
+  const cell = getCell(e);
+  if (cell) paint(cell.col, cell.row, e.button === 2 ? 'floor' : selectedType);
+});
+canvas.addEventListener('mousemove', e => {
+  const cell = getCell(e);
+  if (!cell) return;
+  const t = TILES[grid[cell.row][cell.col]];
+  document.getElementById('coord-display').textContent =
+    `(${cell.col}, ${cell.row})  ·  ${t.short}: ${t.label}`;
+  if (isDragging) paint(cell.col, cell.row, selectedType);
+});
+canvas.addEventListener('mouseup',    () => isDragging = false);
+canvas.addEventListener('mouseleave', () => isDragging = false);
+canvas.addEventListener('contextmenu', e => {
+  e.preventDefault();
+  const cell = getCell(e);
+  if (cell) paint(cell.col, cell.row, 'floor');
+});
+
+// Keyboard shortcuts
+const KEY_MAP = {};
+TYPE_KEYS.forEach(key => { KEY_MAP[TILES[key].key] = key; });
+
+document.addEventListener('keydown', e => {
+  if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'z') {
+    if (history.length > 0) {
+      const { col, row, prev } = history.pop();
+      grid[row][col] = prev; draw();
+    }
+    return;
+  }
+  const mapped = KEY_MAP[e.key.toUpperCase()];
+  if (mapped) selectType(mapped);
+});
+
+// Toggles
+document.getElementById('show-grid').addEventListener('change',   e => { opts.grid   = e.target.checked; draw(); });
+document.getElementById('show-coords').addEventListener('change', e => { opts.coords = e.target.checked; draw(); });
+document.getElementById('show-labels').addEventListener('change', e => { opts.labels = e.target.checked; draw(); });
+
+// File
+document.getElementById('file-input').addEventListener('change', e => {
+  const file = e.target.files[0]; if (!file) return;
+  const reader = new FileReader();
+  reader.onload = ev => {
+    const img = new Image();
+    img.onload = () => { bgImage = img; draw(); };
+    img.src = ev.target.result;
+  };
+  reader.readAsDataURL(file);
+});
+
+// Undo / Reset
+document.getElementById('undo-btn').addEventListener('click', () => {
+  if (history.length > 0) {
+    const { col, row, prev } = history.pop();
+    grid[row][col] = prev; draw();
+  }
+});
+document.getElementById('reset-btn').addEventListener('click', () => {
+  if (confirm('전체 초기화할까요?')) {
+    grid = Array.from({ length: ROWS }, () => Array(COLS).fill('floor'));
+    history = []; draw();
+  }
+});
+
+// ──────────────────────────────────────────────
+//  EXPORT
+// ──────────────────────────────────────────────
+document.getElementById('export-btn').addEventListener('click', () => {
+  let frameIdx = 1;
+  const frameMap = {};
+
+  function cellCode(type, col, row) {
+    switch (type) {
+      case 'floor':       return 'F()';
+      case 'blocked':     return 'X()';
+      case 'billboard':   return "BL('billboard')";
+      case 'frame': {
+        const k = `${col}_${row}`;
+        if (!frameMap[k]) frameMap[k] = `frame-${frameIdx++}`;
+        return `FR('${frameMap[k]}')`;
+      }
+      case 'letter_tree': return "LT('letter-tree')";
+      case 'photobooth':  return "PB('photobooth')";
+      case 'jukebox':     return "JK('jukebox')";
+      case 'cake':        return "CK('cake')";
+      case 'goods':       return "GD('goods')";
+      case 'gacha':       return "GA('gacha')";
+      case 'easter_1':    return "E('easter-1')";
+      case 'easter_2':    return "E('easter-2')";
+      case 'easter_3':    return "E('easter-3')";
+      case 'easter_4':    return "E('easter-4')";
+      case 'easter_5':    return "E('easter-5')";
+      default:            return 'F()';
+    }
+  }
+
+  const lines = [
+    `// ──────────────────────────────────────────────────────────`,
+    `// 맵 에디터에서 자동 생성 — 오브젝트 TILE_OBJECTS는 직접 작성`,
+    `// ──────────────────────────────────────────────────────────`,
+    `import type { Tile, TileObject } from '@/types';`,
+    ``,
+    `export const MAP_COLS = ${COLS};`,
+    `export const MAP_ROWS = ${ROWS};`,
+    `export const TILE_SIZE = 48;`,
+    ``,
+    `const F  = ():             Tile => ({ type: 'floor',        walkable: true  });`,
+    `const X  = ():             Tile => ({ type: 'blocked',      walkable: false });`,
+    `const BL = (id?: string): Tile => ({ type: 'billboard',    walkable: false, objectId: id });`,
+    `const FR = (id?: string): Tile => ({ type: 'frame',        walkable: false, objectId: id });`,
+    `const LT = (id?: string): Tile => ({ type: 'letter_tree',  walkable: false, objectId: id });`,
+    `const PB = (id?: string): Tile => ({ type: 'photobooth',   walkable: false, objectId: id });`,
+    `const JK = (id?: string): Tile => ({ type: 'jukebox',      walkable: false, objectId: id });`,
+    `const CK = (id?: string): Tile => ({ type: 'cake',         walkable: false, objectId: id });`,
+    `const GD = (id?: string): Tile => ({ type: 'goods',        walkable: false, objectId: id });`,
+    `const GA = (id?: string): Tile => ({ type: 'gacha',        walkable: false, objectId: id });`,
+    `const E  = (id?: string): Tile => ({ type: 'easter',       walkable: true,  objectId: id });`,
+    ``,
+    `export const MAP_LAYOUT: Tile[][] = [`,
+    ...grid.map((row, ri) =>
+      `  [${row.map((t, ci) => cellCode(t, ci, ri)).join(', ')}],  // Row ${ri}`
+    ),
+    `];`,
+    ``,
+    `export const TILE_OBJECTS: TileObject[] = [`,
+    `  // 오브젝트마다 position, interactPositions, label 직접 작성`,
+    `];`,
+    ``,
+    `export const PLAYER_START = { x: 6, y: 6 };`,
+  ];
+
+  const output = lines.join('\n');
+  const el = document.getElementById('output-area');
+  el.style.display = 'block';
+  el.textContent = output;
+
+  navigator.clipboard.writeText(output).then(() => {
+    const btn = document.getElementById('export-btn');
+    btn.textContent = '✅ 클립보드에 복사됨!';
+    setTimeout(() => { btn.textContent = '📋 mapLayout.ts 코드 복사'; }, 2500);
+  }).catch(() => {
+    alert('아래 코드를 직접 복사하세요.');
+  });
+});
+
+draw();
+</script>
+</body>
+</html>
