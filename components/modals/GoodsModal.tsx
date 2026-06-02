@@ -26,14 +26,14 @@ export function GoodsModal() {
     <Modal isOpen={activeModal === 'goods'} maxWidth="max-w-sm">
       <div className="p-5">
         <div className="text-center mb-4">
-          <h2 className="font-pixel" style={{ fontSize: '0.55rem', color: '#3d2310' }}>★ 굿즈 매대 ★</h2>
+          <h2 className="font-bold" style={{ fontSize: '0.8rem', color: '#3d2310' }}>★ 굿즈 매대 ★</h2>
           <p style={{ fontSize: '0.65rem', color: '#6b4423', marginTop: '4px' }}>0719 공식 굿즈 (가상 판매)</p>
         </div>
 
         {bought ? (
           <div className="py-6 text-center space-y-2">
             <div style={{ fontSize: '2.5rem' }}>🎁</div>
-            <p style={{ fontSize: '0.75rem', fontWeight: 'bold', color: '#3d2310' }}>구매 완료!</p>
+            <p style={{ fontSize: '0.65rem', fontWeight: 'bold', color: '#3d2310' }}>구매 완료!</p>
             <p style={{ fontSize: '0.65rem', color: '#6b4423' }}>소중히 간직할게요 💛</p>
           </div>
         ) : (
@@ -56,8 +56,8 @@ export function GoodsModal() {
                     }}
                   >
                     <span style={{ fontSize: '1.5rem' }}>{item.emoji}</span>
-                    <span style={{ fontSize: '0.6rem', fontWeight: 'bold', color: '#3d2310', lineHeight: 1.3 }}>{item.name}</span>
-                    <span style={{ fontSize: '0.6rem', color: '#8a4a00', fontWeight: 'bold' }}>{item.price}</span>
+                    <span style={{ fontSize: '0.55rem', fontWeight: 'bold', color: '#3d2310', lineHeight: 1.3 }}>{item.name}</span>
+                    <span style={{ fontSize: '0.55rem', color: '#8a4a00', fontWeight: 'bold' }}>{item.price}</span>
                     <span style={{ fontSize: '0.55rem', color: '#6b4423' }}>재고 {item.stock}</span>
                     {inCart && (
                       <span style={{ fontSize: '0.55rem', color: '#166534', fontWeight: 'bold' }}>✓ 담김</span>

@@ -87,13 +87,13 @@ export function BillboardModal() {
             <p className="font-pixel" style={{ fontSize: '0.65rem', color: '#3d2310', lineHeight: 2 }}>
               HAPPY<br />BIRTHDAY!
             </p>
-            <p style={{ fontSize: '0.75rem', color: '#6b4423' }}>
+            <p style={{ fontSize: '0.65rem', color: '#6b4423' }}>
               {BIRTHDAY_NAME}야, 생일 축하해! 🎉
             </p>
           </div>
         ) : (
           <div className="space-y-4">
-            <p style={{ fontSize: '0.7rem', color: '#6b4423' }}>{BIRTHDAY_NAME}의 생일까지</p>
+            <p style={{ fontSize: '0.65rem', color: '#6b4423' }}>{BIRTHDAY_NAME}의 생일까지</p>
 
             <div className="flex justify-center">
               <Digit value={timeLeft.days} label="DAYS" large />
@@ -107,7 +107,7 @@ export function BillboardModal() {
               <Digit value={timeLeft.seconds} label="SEC" />
             </div>
 
-            <p style={{ fontSize: '0.6rem', color: '#8a6040' }}>
+            <p style={{ fontSize: '0.55rem', color: '#8a6040' }}>
               {BIRTHDAY_DATE.toLocaleDateString('ko-KR', { year: 'numeric', month: 'long', day: 'numeric' })}
             </p>
           </div>

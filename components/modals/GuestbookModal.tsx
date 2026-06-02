@@ -11,7 +11,7 @@ import { supabase } from '@/lib/supabase';
 const RIBBON_OPTIONS = [
   { emoji: '🎀', color: { bg: '#fce8f0', border: '#b87a94' } },
   { emoji: '🌟', color: { bg: '#fdf8e4', border: '#b8992a' } },
-  { emoji: '🍀', color: { bg: '#e8f5ec', border: '#6fa07a' } },
+  { emoji: '🍀', color: { bg: '#e8f5ec', border: '#5a8f65' } },
   { emoji: '🔮', color: { bg: '#ede8f8', border: '#8a72b8' } },
 ];
 
@@ -241,7 +241,7 @@ export function GuestbookModal() {
                     boxShadow: '4px 4px 0 rgba(0,0,0,0.25)',
                   }}
                 >
-                  <p style={{ fontSize: '0.7rem', color: '#3d2310', marginBottom: '10px', textAlign: 'center' }}>
+                  <p style={{ fontSize: '0.65rem', color: '#3d2310', marginBottom: '10px', textAlign: 'center' }}>
                     🌳 관리자 비밀번호
                   </p>
                   <input
@@ -258,7 +258,7 @@ export function GuestbookModal() {
                     placeholder="비밀번호 입력"
                   />
                   {pwError && (
-                    <p style={{ fontSize: '0.6rem', color: '#b87a94', marginBottom: '6px', textAlign: 'center' }}>
+                    <p style={{ fontSize: '0.55rem', color: '#b87a94', marginBottom: '6px', textAlign: 'center' }}>
                       비밀번호가 틀렸어요
                     </p>
                   )}
@@ -291,17 +291,17 @@ export function GuestbookModal() {
             </button>
 
             <div className="text-center">
-              <p style={{ fontSize: '0.65rem', color: '#3d2310' }}>
-                {year}년 방명록
-                {adminMode && (
-                  <button
-                    onClick={handleAdminLogout}
-                    style={{ marginLeft: '6px', fontSize: '0.55rem', color: '#b87a94', cursor: 'pointer' }}
-                  >
-                    [관리자 ✕]
-                  </button>
-                )}
-              </p>
+                <h2 className="font-bold" style={{ fontSize: '0.8rem', color: '#3d2310' }}>
+                    {year}년 방명록
+                    {adminMode && (
+                        <button
+                            onClick={handleAdminLogout}
+                            style={{ marginLeft: '6px', fontSize: '0.55rem', color: '#b87a94', cursor: 'pointer' }}
+                        >
+                            [관리자 ✕]
+                        </button>
+                    )}
+                </h2>
               <p style={{ fontSize: '0.65rem', color: '#6b4423', marginTop: '3px' }}>
                 쪽지 {messages.length}개가 달려있어요
               </p>
@@ -328,7 +328,7 @@ export function GuestbookModal() {
                   exit={{ opacity: 0 }}
                   className="flex items-center justify-center h-full"
                 >
-                  <p style={{ fontSize: '0.72rem', color: '#8a6040' }}>불러오는 중...</p>
+                  <p style={{ fontSize: '0.65rem', color: '#8a6040' }}>불러오는 중...</p>
                 </motion.div>
               ) : messages.length === 0 ? (
                 <motion.div
@@ -339,10 +339,10 @@ export function GuestbookModal() {
                   className="flex flex-col items-center justify-center h-full py-10"
                 >
                   <span style={{ fontSize: '2rem', opacity: 0.35 }}>🌱</span>
-                  <p style={{ fontSize: '0.72rem', color: '#8a6040', marginTop: '10px' }}>
+                  <p style={{ fontSize: '0.65rem', color: '#8a6040', marginTop: '10px' }}>
                     {year}년 방명록은 아직 비어있어요
                   </p>
-                  <p style={{ fontSize: '0.62rem', color: '#a08060', marginTop: '4px' }}>
+                  <p style={{ fontSize: '0.55rem', color: '#a08060', marginTop: '4px' }}>
                     첫 번째 쪽지를 달아보세요!
                   </p>
                 </motion.div>
@@ -372,10 +372,10 @@ export function GuestbookModal() {
                         {m.emoji ?? '🎀'}
                       </span>
                       <div className="flex-1 min-w-0">
-                        <p style={{ fontSize: '0.8rem', color: '#1a0e00', lineHeight: 1.5, wordBreak: 'break-word' }}>
+                        <p style={{ fontSize: '0.65rem', color: '#1a0e00', lineHeight: 1.5, wordBreak: 'break-word' }}>
                           {m.message}
                         </p>
-                        <p style={{ fontSize: '0.6rem', color: m.color.border, marginTop: '4px', opacity: 0.8 }}>
+                        <p style={{ fontSize: '0.55rem', color: m.color.border, marginTop: '4px', opacity: 0.8 }}>
                           {adminMode ? m.nickname : '익명'} · {m.date}
                         </p>
                       </div>

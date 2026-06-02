@@ -9,7 +9,7 @@ export function PhotoGalleryModal() {
   return (
     <Modal isOpen={activeModal === 'gallery'} maxWidth="max-w-lg">
       <div className="p-5">
-        <h2 className="font-pixel text-center mb-4" style={{ fontSize: '0.6rem', color: '#3d2310' }}>
+        <h2 className="font-bold text-center mb-4" style={{ fontSize: '0.8rem', color: '#3d2310' }}>
           ★ 사진 갤러리 ★
         </h2>
         <div className="grid grid-cols-2 gap-3">

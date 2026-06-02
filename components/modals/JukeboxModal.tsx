@@ -26,7 +26,7 @@ export function JukeboxModal() {
       <div className="p-5">
         <div className="text-center mb-4">
           <p style={{ fontSize: '2rem', lineHeight: 1, marginBottom: '6px' }}>🎵</p>
-          <h2 className="font-pixel" style={{ fontSize: '0.55rem', color: '#3d2310' }}>★ 주크박스 ★</h2>
+          <h2 className="font-bold" style={{ fontSize: '0.8rem', color: '#3d2310' }}>★ 주크박스 ★</h2>
           <p style={{ fontSize: '0.65rem', color: '#6b4423', marginTop: '4px' }}>BGM을 선택하세요</p>
         </div>
 
@@ -49,11 +49,8 @@ export function JukeboxModal() {
                 }}
               >
                 <span style={{ fontSize: '1.2rem' }}>{track.emoji}</span>
-                <span style={{ flex: 1, fontSize: '0.7rem', color: '#3d2310' }}>{track.label}</span>
-                <span
-                  className="font-pixel"
-                  style={{ fontSize: '0.45rem', color: isPlaying ? '#7a4f00' : '#8a6040' }}
-                >
+                <span style={{ flex: 1, fontSize: '0.65rem', color: '#3d2310' }}>{track.label}</span>
+                <span style={{ fontSize: '0.55rem', color: isPlaying ? '#7a4f00' : '#8a6040' }}>
                   {isPlaying ? '▶ 재생 중' : '재생'}
                 </span>
               </button>
@@ -70,7 +67,7 @@ export function JukeboxModal() {
           </button>
         )}
 
-        <p className="text-center mt-3 font-pixel" style={{ fontSize: '0.4rem', color: '#a08060' }}>
+        <p className="text-center mt-3" style={{ fontSize: '0.55rem', color: '#a08060' }}>
           /public/audio/ 에 mp3 추가
         </p>
       </div>

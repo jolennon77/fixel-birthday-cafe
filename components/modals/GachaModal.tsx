@@ -30,7 +30,7 @@ export function GachaModal() {
   return (
     <Modal isOpen={activeModal === 'gacha'} maxWidth="max-w-xs">
       <div className="p-5 text-center">
-        <h2 className="font-pixel mb-1" style={{ fontSize: '0.55rem', color: '#3d2310' }}>★ 캡슐 뽑기 ★</h2>
+        <h2 className="font-bold mb-1" style={{ fontSize: '0.8rem', color: '#3d2310' }}>★ 캡슐 뽑기 ★</h2>
         <p style={{ fontSize: '0.65rem', color: '#6b4423', marginBottom: '1.2rem' }}>축하 메시지를 뽑아보세요!</p>
 
         {/* 캡슐 머신 — 픽셀 사각 박스 */}
@@ -90,7 +90,7 @@ export function GachaModal() {
               className="px-inset mb-4 text-left p-3"
             >
               <p style={{ fontSize: '0.65rem', fontWeight: 'bold', color: '#3d2310', marginBottom: '4px' }}>{result.title}</p>
-              <p style={{ fontSize: '0.6rem', color: '#6b4423', lineHeight: 1.6 }}>{result.message}</p>
+              <p style={{ fontSize: '0.55rem', color: '#6b4423', lineHeight: 1.6 }}>{result.message}</p>
             </motion.div>
           ) : (
             <div style={{ height: '72px', marginBottom: '1rem' }} />
@@ -103,7 +103,7 @@ export function GachaModal() {
           </button>
         )}
         {phase === 'rolling' && (
-          <p className="font-pixel" style={{ fontSize: '0.5rem', color: '#6b4423' }}>뽑는 중...</p>
+          <p style={{ fontSize: '0.55rem', color: '#6b4423' }}>뽑는 중...</p>
         )}
         {phase === 'result' && (
           <button onClick={reset} className="px-btn w-full">

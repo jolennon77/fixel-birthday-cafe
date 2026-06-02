@@ -101,7 +101,7 @@ export function PhotoBoothModal() {
   return (
     <Modal isOpen={activeModal === 'photobooth'} maxWidth="max-w-xs">
       <div className="p-5 text-center">
-        <h2 className="font-pixel mb-1" style={{ fontSize: '0.55rem', color: '#3d2310' }}>★ 포토부스 ★</h2>
+        <h2 className="font-bold mb-1" style={{ fontSize: '0.8rem', color: '#3d2310' }}>★ 포토부스 ★</h2>
         <p style={{ fontSize: '0.65rem', color: '#6b4423', marginBottom: '1rem' }}>방문 기념 포토카드를 저장하세요!</p>
 
         <div className="flex justify-center mb-4">
