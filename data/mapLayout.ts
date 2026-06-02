@@ -35,7 +35,84 @@ export const MAP_LAYOUT: Tile[][] = [
 ];
 
 export const TILE_OBJECTS: TileObject[] = [
-    // 오브젝트마다 position, interactPositions, label 직접 작성
+  {
+    id: 'billboard',
+    type: 'billboard',
+    position: { x: 7, y: 1 },
+    interactPositions: [
+      { x: 6, y: 3 }, { x: 7, y: 3 }, { x: 8, y: 3 }, { x: 9, y: 3 },
+    ],
+    label: 'D-day 전광판',
+  },
+  {
+    id: 'frame',
+    type: 'frame',
+    position: { x: 12, y: 1 },
+    interactPositions: [
+      { x: 10, y: 3 }, { x: 11, y: 3 }, { x: 12, y: 3 }, { x: 13, y: 3 }, { x: 14, y: 3 },
+    ],
+    label: '사진 갤러리',
+  },
+  {
+    id: 'letter-tree',
+    type: 'letter_tree',
+    position: { x: 2, y: 5 },
+    interactPositions: [
+      { x: 4, y: 4 }, { x: 4, y: 5 }, { x: 4, y: 6 },
+    ],
+    label: '방명록 나무',
+  },
+  {
+    id: 'photobooth',
+    type: 'photobooth',
+    position: { x: 13, y: 5 },
+    interactPositions: [
+      { x: 11, y: 4 }, { x: 11, y: 5 }, { x: 11, y: 6 },
+      { x: 12, y: 7 },
+    ],
+    label: '포토부스',
+  },
+  {
+    id: 'jukebox',
+    type: 'jukebox',
+    position: { x: 14, y: 6 },
+    interactPositions: [
+      { x: 13, y: 7 },
+    ],
+    label: '주크박스',
+  },
+  {
+    id: 'cake',
+    type: 'cake',
+    position: { x: 7, y: 9 },
+    interactPositions: [
+      { x: 7, y: 8 }, { x: 8, y: 8 },
+      { x: 6, y: 9 }, { x: 6, y: 10 },
+      { x: 9, y: 9 }, { x: 9, y: 10 },
+    ],
+    label: '생일 케이크',
+  },
+  {
+    id: 'goods',
+    type: 'goods',
+    position: { x: 11, y: 8 },
+    interactPositions: [
+      { x: 11, y: 7 }, { x: 12, y: 7 },
+      { x: 10, y: 8 }, { x: 10, y: 9 },
+      { x: 11, y: 10 }, { x: 12, y: 10 },
+    ],
+    label: '굿즈 매대',
+  },
+  {
+    id: 'gacha',
+    type: 'gacha',
+    position: { x: 14, y: 8 },
+    interactPositions: [
+      { x: 13, y: 8 }, { x: 13, y: 9 },
+      { x: 14, y: 10 },
+    ],
+    label: '캡슐 뽑기',
+  },
 ];
 
 export const PLAYER_START = { x: 8, y: 7 };

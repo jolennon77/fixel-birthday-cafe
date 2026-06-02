@@ -8,20 +8,23 @@ export function PhotoGalleryModal() {
 
   return (
     <Modal isOpen={activeModal === 'gallery'} maxWidth="max-w-lg">
-      <div className="p-6">
-        <h2 className="text-lg font-bold text-center mb-4">📷 사진 갤러리</h2>
+      <div className="p-5">
+        <h2 className="font-pixel text-center mb-4" style={{ fontSize: '0.6rem', color: '#3d2310' }}>
+          ★ 사진 갤러리 ★
+        </h2>
         <div className="grid grid-cols-2 gap-3">
           {Array.from({ length: 4 }).map((_, i) => (
             <div
               key={i}
-              className="aspect-square bg-amber-100 rounded-xl flex items-center justify-center text-4xl border-2 border-dashed border-amber-300"
+              className="px-inset aspect-square flex items-center justify-center"
+              style={{ fontSize: '2.5rem' }}
             >
               🖼
             </div>
           ))}
         </div>
-        <p className="text-center text-xs text-gray-400 mt-4">
-          /public/photos/ 폴더에 사진을 넣으면 여기에 표시돼요
+        <p className="text-center mt-4" style={{ fontSize: '0.55rem', color: '#8a6040', fontFamily: 'var(--font-pixel), monospace' }}>
+          /public/photos/ 에 사진을 추가하세요
         </p>
       </div>
     </Modal>

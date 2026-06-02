@@ -72,20 +72,14 @@ function getNearbyNpc(
 }
 
 const MODAL_MAP: Record<string, NonNullable<ModalType>> = {
-  frame:        'gallery',
-  letter_tree:  'guestbook',
-  photobooth:   'photobooth',
-  jukebox:      'jukebox',
-  cake:         'candle',
-  goods:        'goods',
-  gacha:        'gacha',
-  billboard:    'billboard',
-  // legacy
-  counter:      'receipt',
-  tree:         'guestbook',
-  npc:          'npc',
-  menu_board:   'menu',
-  letter_board: 'letter',
+  frame:       'gallery',
+  letter_tree: 'guestbook',
+  photobooth:  'photobooth',
+  jukebox:     'jukebox',
+  cake:        'candle',
+  goods:       'goods',
+  gacha:       'gacha',
+  billboard:   'billboard',
 };
 
 export const useCafeStore = create<CafeState>()(

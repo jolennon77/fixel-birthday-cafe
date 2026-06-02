@@ -7,7 +7,7 @@ import { VIRTUAL_GOODS } from '@/data/config';
 
 export function GoodsModal() {
   const activeModal = useCafeStore((s) => s.activeModal);
-  const [cart, setCart] = useState<Record<string, number>>({});
+  const [cart, setCart]   = useState<Record<string, number>>({});
   const [bought, setBought] = useState(false);
 
   const toggle = (id: string) => {
@@ -19,25 +19,22 @@ export function GoodsModal() {
   const handleBuy = () => {
     if (cartCount === 0) return;
     setBought(true);
-    setTimeout(() => {
-      setBought(false);
-      setCart({});
-    }, 2500);
+    setTimeout(() => { setBought(false); setCart({}); }, 2500);
   };
 
   return (
     <Modal isOpen={activeModal === 'goods'} maxWidth="max-w-sm">
       <div className="p-5">
         <div className="text-center mb-4">
-          <h2 className="text-base font-bold">🛍️ 굿즈 매대</h2>
-          <p className="text-xs text-gray-400 mt-0.5">0719 공식 굿즈 (가상 판매)</p>
+          <h2 className="font-pixel" style={{ fontSize: '0.55rem', color: '#3d2310' }}>★ 굿즈 매대 ★</h2>
+          <p style={{ fontSize: '0.65rem', color: '#6b4423', marginTop: '4px' }}>0719 공식 굿즈 (가상 판매)</p>
         </div>
 
         {bought ? (
-          <div className="py-8 text-center space-y-2">
-            <div className="text-4xl">🎁</div>
-            <p className="font-bold text-sm">구매 완료!</p>
-            <p className="text-xs text-gray-400">소중히 간직할게요 💛</p>
+          <div className="py-6 text-center space-y-2">
+            <div style={{ fontSize: '2.5rem' }}>🎁</div>
+            <p style={{ fontSize: '0.75rem', fontWeight: 'bold', color: '#3d2310' }}>구매 완료!</p>
+            <p style={{ fontSize: '0.65rem', color: '#6b4423' }}>소중히 간직할게요 💛</p>
           </div>
         ) : (
           <>
@@ -48,19 +45,22 @@ export function GoodsModal() {
                   <button
                     key={item.id}
                     onClick={() => toggle(item.id)}
-                    className={[
-                      'flex flex-col items-center gap-1 p-3 rounded-xl border-2 text-center transition-all',
-                      inCart
-                        ? 'border-amber-400 bg-amber-50 scale-[1.02]'
-                        : 'border-gray-200 bg-white hover:border-gray-300',
-                    ].join(' ')}
+                    className="flex flex-col items-center gap-1 p-3 text-center transition-all"
+                    style={{
+                      background: inCart ? '#fef08a' : '#e8d0a0',
+                      border: `3px solid ${inCart ? '#a16207' : '#3d2310'}`,
+                      boxShadow: inCart
+                        ? 'inset 2px 2px 0 #fdf4d0, inset -2px -2px 0 #a07000, 2px 2px 0 rgba(0,0,0,0.3)'
+                        : 'inset 2px 2px 0 #f5e8c0, inset -2px -2px 0 #c9a87c, 2px 2px 0 rgba(0,0,0,0.3)',
+                      cursor: 'pointer',
+                    }}
                   >
-                    <span className="text-2xl">{item.emoji}</span>
-                    <span className="text-xs font-medium leading-tight">{item.name}</span>
-                    <span className="text-xs text-amber-600 font-bold">{item.price}</span>
-                    <span className="text-[10px] text-gray-400">재고 {item.stock}</span>
+                    <span style={{ fontSize: '1.5rem' }}>{item.emoji}</span>
+                    <span style={{ fontSize: '0.6rem', fontWeight: 'bold', color: '#3d2310', lineHeight: 1.3 }}>{item.name}</span>
+                    <span style={{ fontSize: '0.6rem', color: '#8a4a00', fontWeight: 'bold' }}>{item.price}</span>
+                    <span style={{ fontSize: '0.55rem', color: '#6b4423' }}>재고 {item.stock}</span>
                     {inCart && (
-                      <span className="text-[10px] text-amber-600 font-bold">✓ 담김</span>
+                      <span style={{ fontSize: '0.55rem', color: '#166534', fontWeight: 'bold' }}>✓ 담김</span>
                     )}
                   </button>
                 );
@@ -70,12 +70,7 @@ export function GoodsModal() {
             <button
               onClick={handleBuy}
               disabled={cartCount === 0}
-              className={[
-                'w-full py-2.5 rounded-xl text-sm font-bold transition-all',
-                cartCount > 0
-                  ? 'bg-amber-400 text-stone-900 hover:bg-amber-300 active:scale-95'
-                  : 'bg-gray-100 text-gray-400 cursor-not-allowed',
-              ].join(' ')}
+              className="px-btn px-btn-amber w-full"
             >
               {cartCount > 0 ? `${cartCount}개 담기 🛒` : '굿즈를 선택하세요'}
             </button>

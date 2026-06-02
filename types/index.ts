@@ -44,17 +44,13 @@ export interface AmbientNpcState extends AmbientNpcConfig {
 
 export type ModalType =
   | 'gallery'
-  | 'receipt'
   | 'guestbook'
   | 'candle'
   | 'goods'
   | 'billboard'
-  | 'npc'
   | 'jukebox'
   | 'photobooth'
   | 'gacha'
-  | 'menu'
-  | 'letter'
   | null;
 
 export type ObjectType =

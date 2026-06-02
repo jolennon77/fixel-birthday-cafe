@@ -17,35 +17,37 @@ export function Modal({ isOpen, children, maxWidth = 'max-w-md', hideCloseButton
     <AnimatePresence>
       {isOpen && (
         <>
-          {/* Backdrop */}
           <motion.div
             key="backdrop"
-            className="fixed inset-0 bg-black/60 backdrop-blur-sm z-40"
+            className="fixed inset-0 z-40"
+            style={{ background: 'rgba(15,8,2,0.82)' }}
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             onClick={closeModal}
           />
-          {/* Panel */}
           <motion.div
             key="panel"
-            className={`fixed inset-0 z-50 flex items-center justify-center p-4`}
-            initial={{ opacity: 0, scale: 0.92, y: 16 }}
+            className="fixed inset-0 z-50 flex items-center justify-center p-4"
+            initial={{ opacity: 0, scale: 0.88, y: 6 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
-            exit={{ opacity: 0, scale: 0.92, y: 16 }}
-            transition={{ type: 'spring', stiffness: 320, damping: 28 }}
+            exit={{ opacity: 0, scale: 0.88, y: 6 }}
+            transition={{ type: 'spring', stiffness: 400, damping: 30 }}
           >
-            <div className={`relative w-full ${maxWidth} bg-white rounded-2xl shadow-2xl overflow-hidden`}>
+            <div className={`relative w-full ${maxWidth} px-panel`}>
               {!hideCloseButton && (
                 <button
                   onClick={closeModal}
-                  className="absolute top-3 right-3 z-10 w-7 h-7 flex items-center justify-center rounded-full bg-stone-900/50 hover:bg-stone-900/70 text-white text-xs backdrop-blur-sm transition-colors"
                   aria-label="닫기"
+                  className="px-btn px-btn-red absolute top-[-14px] right-[-14px] z-10 w-8 h-8"
+                  style={{ padding: 0, fontSize: '0.6rem' }}
                 >
                   ✕
                 </button>
               )}
-              {children}
+              <div className="overflow-y-auto" style={{ maxHeight: '82vh' }}>
+                {children}
+              </div>
             </div>
           </motion.div>
         </>

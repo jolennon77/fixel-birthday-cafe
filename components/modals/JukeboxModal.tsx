@@ -24,10 +24,10 @@ export function JukeboxModal() {
   return (
     <Modal isOpen={activeModal === 'jukebox'} maxWidth="max-w-xs">
       <div className="p-5">
-        <div className="text-center mb-5">
-          <div className="text-3xl mb-1">🎵</div>
-          <h2 className="font-bold text-sm">카페 주크박스</h2>
-          <p className="text-xs text-gray-400 mt-0.5">BGM을 선택하세요</p>
+        <div className="text-center mb-4">
+          <p style={{ fontSize: '2rem', lineHeight: 1, marginBottom: '6px' }}>🎵</p>
+          <h2 className="font-pixel" style={{ fontSize: '0.55rem', color: '#3d2310' }}>★ 주크박스 ★</h2>
+          <p style={{ fontSize: '0.65rem', color: '#6b4423', marginTop: '4px' }}>BGM을 선택하세요</p>
         </div>
 
         <div className="space-y-2">
@@ -37,21 +37,24 @@ export function JukeboxModal() {
               <button
                 key={track.id}
                 onClick={() => handleSelect(track.id, track.src)}
-                className={[
-                  'w-full flex items-center gap-3 px-4 py-3 rounded-xl border-2 transition-all',
-                  isPlaying
-                    ? 'border-indigo-400 bg-indigo-50'
-                    : 'border-gray-200 bg-white hover:border-gray-300 active:scale-[0.98]',
-                ].join(' ')}
+                className="w-full flex items-center gap-3 px-3 py-2.5"
+                style={{
+                  background: isPlaying ? '#fef08a' : '#e8d0a0',
+                  border: `3px solid ${isPlaying ? '#a16207' : '#3d2310'}`,
+                  boxShadow: isPlaying
+                    ? 'inset 2px 2px 0 #fdf4d0, inset -2px -2px 0 #a07000, 2px 2px 0 rgba(0,0,0,0.3)'
+                    : 'inset 2px 2px 0 #f5e8c0, inset -2px -2px 0 #c9a87c, 2px 2px 0 rgba(0,0,0,0.3)',
+                  cursor: 'pointer',
+                  textAlign: 'left',
+                }}
               >
-                <span className="text-xl">{track.emoji}</span>
-                <span className="flex-1 text-sm font-medium text-left">{track.label}</span>
-                <span className="text-xs">
-                  {isPlaying ? (
-                    <span className="text-indigo-500 font-bold">▶ 재생 중</span>
-                  ) : (
-                    <span className="text-gray-400">재생</span>
-                  )}
+                <span style={{ fontSize: '1.2rem' }}>{track.emoji}</span>
+                <span style={{ flex: 1, fontSize: '0.7rem', color: '#3d2310' }}>{track.label}</span>
+                <span
+                  className="font-pixel"
+                  style={{ fontSize: '0.45rem', color: isPlaying ? '#7a4f00' : '#8a6040' }}
+                >
+                  {isPlaying ? '▶ 재생 중' : '재생'}
                 </span>
               </button>
             );
@@ -61,14 +64,14 @@ export function JukeboxModal() {
         {currentBgmId && (
           <button
             onClick={() => { stopBGM(); setCurrentBgm(null); }}
-            className="mt-3 w-full py-2 text-xs text-gray-500 hover:text-gray-700 transition-colors"
+            className="px-btn px-btn-red w-full mt-3"
           >
             ■ 정지
           </button>
         )}
 
-        <p className="text-center text-[10px] text-gray-300 mt-3">
-          /public/audio/ 폴더에 mp3 파일을 추가하세요
+        <p className="text-center mt-3 font-pixel" style={{ fontSize: '0.4rem', color: '#a08060' }}>
+          /public/audio/ 에 mp3 추가
         </p>
       </div>
     </Modal>

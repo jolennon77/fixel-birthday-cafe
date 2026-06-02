@@ -17,7 +17,6 @@ export function GachaModal() {
   const roll = () => {
     if (phase !== 'idle') return;
     setPhase('rolling');
-
     setTimeout(() => {
       const pick = GACHA_MESSAGES[Math.floor(Math.random() * GACHA_MESSAGES.length)];
       setResult(pick);
@@ -31,19 +30,26 @@ export function GachaModal() {
   return (
     <Modal isOpen={activeModal === 'gacha'} maxWidth="max-w-xs">
       <div className="p-5 text-center">
-        <h2 className="font-bold text-sm mb-1">🎰 캡슐 뽑기</h2>
-        <p className="text-xs text-gray-400 mb-5">축하 메시지를 뽑아보세요!</p>
+        <h2 className="font-pixel mb-1" style={{ fontSize: '0.55rem', color: '#3d2310' }}>★ 캡슐 뽑기 ★</h2>
+        <p style={{ fontSize: '0.65rem', color: '#6b4423', marginBottom: '1.2rem' }}>축하 메시지를 뽑아보세요!</p>
 
-        {/* 머신 시각화 */}
-        <div className="relative w-28 h-28 mx-auto mb-5">
-          <div className="w-28 h-28 rounded-full border-4 border-red-300 bg-red-50 flex items-center justify-center shadow-inner">
+        {/* 캡슐 머신 — 픽셀 사각 박스 */}
+        <div className="mx-auto mb-5" style={{ width: '108px', height: '108px', position: 'relative' }}>
+          <div
+            className="w-full h-full flex items-center justify-center"
+            style={{
+              background: '#1a0e00',
+              border: '4px solid #3d2310',
+              boxShadow: 'inset 3px 3px 0 #2a1a08, inset -3px -3px 0 #0a0500, 4px 4px 0 rgba(0,0,0,0.5)',
+            }}
+          >
             <AnimatePresence mode="wait">
               {phase === 'rolling' ? (
                 <motion.div
                   key="roll"
                   animate={{ rotate: 360 }}
                   transition={{ repeat: Infinity, duration: 0.4, ease: 'linear' }}
-                  className="text-4xl"
+                  style={{ fontSize: '2.8rem' }}
                 >
                   🎰
                 </motion.div>
@@ -53,15 +59,25 @@ export function GachaModal() {
                   initial={{ scale: 0, rotate: -20 }}
                   animate={{ scale: 1, rotate: 0 }}
                   transition={{ type: 'spring', stiffness: 300, damping: 18 }}
-                  className="text-5xl"
+                  style={{ fontSize: '3.2rem' }}
                 >
                   {result.emoji}
                 </motion.div>
               ) : (
-                <motion.div key="idle" className="text-4xl opacity-50">🎰</motion.div>
+                <motion.div key="idle" style={{ fontSize: '2.8rem', opacity: 0.5 }}>🎰</motion.div>
               )}
             </AnimatePresence>
           </div>
+          {/* 픽셀 코인 슬롯 장식 */}
+          <div
+            style={{
+              position: 'absolute', bottom: '-10px', left: '50%', transform: 'translateX(-50%)',
+              width: '32px', height: '8px',
+              background: '#3d2310',
+              border: '2px solid #1a0e00',
+              boxShadow: 'inset 1px 1px 0 #5a3a20',
+            }}
+          />
         </div>
 
         {/* 결과 텍스트 */}
@@ -71,42 +87,34 @@ export function GachaModal() {
               key="text"
               initial={{ opacity: 0, y: 8 }}
               animate={{ opacity: 1, y: 0 }}
-              className="bg-amber-50 rounded-xl p-4 mb-4 text-left"
+              className="px-inset mb-4 text-left p-3"
             >
-              <p className="font-bold text-sm mb-1">{result.title}</p>
-              <p className="text-xs text-gray-600 leading-relaxed">{result.message}</p>
+              <p style={{ fontSize: '0.65rem', fontWeight: 'bold', color: '#3d2310', marginBottom: '4px' }}>{result.title}</p>
+              <p style={{ fontSize: '0.6rem', color: '#6b4423', lineHeight: 1.6 }}>{result.message}</p>
             </motion.div>
           ) : (
-            <div className="h-[72px] mb-4" />
+            <div style={{ height: '72px', marginBottom: '1rem' }} />
           )}
         </AnimatePresence>
 
-        {/* 버튼 */}
         {phase === 'idle' && (
-          <button
-            onClick={roll}
-            className="w-full py-2.5 bg-red-400 text-white font-bold text-sm rounded-xl hover:bg-red-300 active:scale-95 transition-all"
-          >
+          <button onClick={roll} className="px-btn px-btn-amber w-full">
             뽑기! 🎰
           </button>
         )}
         {phase === 'rolling' && (
-          <div className="text-sm text-gray-400 animate-pulse">뽑는 중...</div>
+          <p className="font-pixel" style={{ fontSize: '0.5rem', color: '#6b4423' }}>뽑는 중...</p>
         )}
         {phase === 'result' && (
-          <button
-            onClick={reset}
-            className="w-full py-2.5 bg-amber-400 text-stone-900 font-bold text-sm rounded-xl hover:bg-amber-300 active:scale-95 transition-all"
-          >
+          <button onClick={reset} className="px-btn w-full">
             한 번 더 🎰
           </button>
         )}
 
-        {/* 뽑기 히스토리 */}
         {history.length > 0 && (
           <div className="flex justify-center gap-1 mt-3">
             {history.map((e, i) => (
-              <span key={i} className="text-sm opacity-60">{e}</span>
+              <span key={i} style={{ fontSize: '0.8rem', opacity: 0.55 }}>{e}</span>
             ))}
           </div>
         )}

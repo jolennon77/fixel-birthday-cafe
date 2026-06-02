@@ -9,17 +9,13 @@ import { AmbientNpcs } from './AmbientNpcs';
 import { VirtualDpad } from './VirtualDpad';
 import { InteractionHint } from './InteractionHint';
 import { PhotoGalleryModal } from '@/components/modals/PhotoGalleryModal';
-import { ReceiptModal } from '@/components/modals/ReceiptModal';
 import { GuestbookModal } from '@/components/modals/GuestbookModal';
 import { CandleModal } from '@/components/modals/CandleModal';
 import { GoodsModal } from '@/components/modals/GoodsModal';
 import { BillboardModal } from '@/components/modals/BillboardModal';
-import { NpcModal } from '@/components/modals/NpcModal';
 import { JukeboxModal } from '@/components/modals/JukeboxModal';
 import { GachaModal } from '@/components/modals/GachaModal';
-import { MenuModal } from '@/components/modals/MenuModal';
 import { PhotoBoothModal } from '@/components/modals/PhotoBoothModal';
-import { BirthdayLetterModal } from '@/components/modals/BirthdayLetterModal';
 import { MAP_COLS, MAP_ROWS, TILE_SIZE } from '@/data/mapLayout';
 
 const MOBILE_BREAKPOINT = 768;
@@ -39,7 +35,6 @@ function useTileSize() {
       setIsLandscape(landscape);
 
       if (mobile) {
-        // 가로 모드: D-pad가 맵 위에 오버레이되므로 전체 화면 활용
         const dpadReserve = landscape ? 16 : 160;
         const maxTileW = Math.floor((vw - 8) / MAP_COLS);
         const maxTileH = Math.floor((vh - dpadReserve) / MAP_ROWS);
@@ -105,7 +100,7 @@ export function CafeScene() {
           className="relative"
           style={{ width: mapWidth, height: mapHeight, margin: '0 auto' }}
         >
-          <TileMap playerPosition={position} tileSize={tileSize} />
+          <TileMap tileSize={tileSize} />
           {/* <AmbientNpcs tileSize={tileSize} /> */}
           <Character
             position={position}
@@ -126,19 +121,14 @@ export function CafeScene() {
         />
       )}
 
-      {/* 모달 */}
       <PhotoGalleryModal />
-      <ReceiptModal />
       <GuestbookModal />
       <CandleModal />
       <GoodsModal />
       <BillboardModal />
-      <NpcModal />
       <JukeboxModal />
       <GachaModal />
-      <MenuModal />
       <PhotoBoothModal />
-      <BirthdayLetterModal />
     </div>
   );
 }
