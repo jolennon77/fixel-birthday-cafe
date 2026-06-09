@@ -7,7 +7,6 @@ import type { Direction, Position, CharacterGender } from '@/types';
 
 const SPRITE_H = 64;
 const WALK_FRAMES = [1, 2] as const;
-const WALK_INTERVAL_MS = 150;
 const STOP_DELAY_MS = 200;
 
 function getSpriteSrc(gender: CharacterGender, direction: Direction, frame: number): string {
@@ -27,23 +26,14 @@ export function Character({ position, direction, tileSize, gender }: CharacterPr
   const [cycleIdx, setCycleIdx] = useState(0);
   const stopTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  // 위치가 바뀔 때마다 걷기 시작, STOP_DELAY_MS 동안 변화 없으면 정지
+  // 한 칸 이동마다 다음 발로 전진 — cycleIdx는 리셋하지 않음
   useEffect(() => {
+    setCycleIdx(i => (i + 1) % WALK_FRAMES.length);
     setWalking(true);
     if (stopTimer.current) clearTimeout(stopTimer.current);
-    stopTimer.current = setTimeout(() => {
-      setWalking(false);
-      setCycleIdx(0);
-    }, STOP_DELAY_MS);
+    stopTimer.current = setTimeout(() => setWalking(false), STOP_DELAY_MS);
     return () => { if (stopTimer.current) clearTimeout(stopTimer.current); };
   }, [position.x, position.y]);
-
-  // 걷는 중일 때만 프레임 교대
-  useEffect(() => {
-    if (!walking) return;
-    const id = setInterval(() => setCycleIdx(i => (i + 1) % WALK_FRAMES.length), WALK_INTERVAL_MS);
-    return () => clearInterval(id);
-  }, [walking]);
 
   const frame = walking ? WALK_FRAMES[cycleIdx] : 0;
 
