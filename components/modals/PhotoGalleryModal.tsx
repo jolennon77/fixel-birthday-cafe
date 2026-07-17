@@ -1,7 +1,10 @@
 'use client';
 
+import Image from 'next/image';
 import { useCafeStore } from '@/store/cafeStore';
 import { Modal } from '@/components/ui/Modal';
+
+const PHOTOS = ['/photos/1.jpg', '/photos/2.jpg', '/photos/3.jpg', '/photos/4.jpg'];
 
 export function PhotoGalleryModal() {
   const activeModal = useCafeStore((s) => s.activeModal);
@@ -13,18 +16,21 @@ export function PhotoGalleryModal() {
           ★ 사진 갤러리 ★
         </h2>
         <div className="grid grid-cols-2 gap-3">
-          {Array.from({ length: 4 }).map((_, i) => (
+          {PHOTOS.map((src, i) => (
             <div
-              key={i}
-              className="px-inset aspect-square flex items-center justify-center"
-              style={{ fontSize: '2.5rem' }}
+              key={src}
+              className="px-inset aspect-square relative overflow-hidden rounded"
             >
-              🖼
+              <Image
+                src={src}
+                alt={`추억 사진 ${i + 1}`}
+                fill
+                className="object-cover"
+              />
             </div>
           ))}
         </div>
         <p className="text-center mt-4" style={{ fontSize: '0.55rem', color: '#8a6040', fontFamily: 'var(--font-pixel), monospace' }}>
-          /public/photos/ 에 사진을 추가하세요
         </p>
       </div>
     </Modal>

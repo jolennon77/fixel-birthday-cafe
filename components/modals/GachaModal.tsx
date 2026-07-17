@@ -31,7 +31,7 @@ export function GachaModal() {
     <Modal isOpen={activeModal === 'gacha'} maxWidth="max-w-xs">
       <div className="p-5 text-center">
         <h2 className="font-bold mb-1" style={{ fontSize: '0.8rem', color: '#3d2310' }}>★ 캡슐 뽑기 ★</h2>
-        <p style={{ fontSize: '0.65rem', color: '#6b4423', marginBottom: '1.2rem' }}>축하 메시지를 뽑아보세요!</p>
+        <p style={{ fontSize: '0.65rem', color: '#6b4423', marginBottom: '1.2rem' }}>행운 메시지를 뽑아보세요!</p>
 
         {/* 캡슐 머신 — 픽셀 사각 박스 */}
         <div className="mx-auto mb-5" style={{ width: '108px', height: '108px', position: 'relative' }}>

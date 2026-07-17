@@ -6,7 +6,8 @@ import Image from 'next/image';
 import { useCafeStore } from '@/store/cafeStore';
 import { Modal } from '@/components/ui/Modal';
 import { BIRTHDAY_DATE } from '@/data/config';
-import { supabase } from '@/lib/supabase';
+import { db } from '@/lib/firebase';
+import { collection, query, where, getDocs, addDoc, Timestamp } from 'firebase/firestore';
 
 const RIBBON_OPTIONS = [
   { emoji: '🎀', color: { bg: '#fce8f0', border: '#b87a94' } },
@@ -73,21 +74,28 @@ export function GuestbookModal() {
 
   const fetchMessages = async (y: number) => {
     setLoading(true);
-    const { data, error } = await supabase
-      .from('guestbook')
-      .select('id, message, nickname, emoji, bg, border, created_at')
-      .eq('year', y)
-      .order('created_at', { ascending: false });
-
-    if (!error && data) {
-      setMessages(data.map((row) => ({
-        id:       row.id,
-        message:  row.message,
-        nickname: row.nickname ?? '익명',
-        emoji:    row.emoji,
-        color:    { bg: row.bg, border: row.border },
-        date:     row.created_at.slice(0, 10).replace(/-/g, '.'),
-      })));
+    try {
+      // year 필터 + createdAt 정렬을 Firestore 쿼리에서 함께 하려면 복합 인덱스가 필요하므로,
+      // 정렬은 클라이언트에서 처리해 인덱스 생성 없이도 동작하게 한다.
+      const q = query(collection(db, 'guestbook'), where('year', '==', y));
+      const snap = await getDocs(q);
+      const sortedDocs = [...snap.docs].sort(
+        (a, b) => (b.data().createdAt as Timestamp).toMillis() - (a.data().createdAt as Timestamp).toMillis()
+      );
+      setMessages(sortedDocs.map((docSnap) => {
+        const row = docSnap.data();
+        const createdAt: Timestamp = row.createdAt;
+        return {
+          id:       docSnap.id,
+          message:  row.message,
+          nickname: row.nickname ?? '익명',
+          emoji:    row.emoji,
+          color:    { bg: row.bg, border: row.border },
+          date:     createdAt.toDate().toISOString().slice(0, 10).replace(/-/g, '.'),
+        };
+      }));
+    } catch {
+      setMessages([]);
     }
     setLoading(false);
   };
@@ -138,30 +146,29 @@ export function GuestbookModal() {
   const handleSubmit = async () => {
     if (!input.trim()) return;
 
+    const now = new Date();
     const payload = {
       year,
-      message:  input.trim(),
-      nickname: playerInfo?.nickname?.trim() || '익명',
-      emoji:    selectedRibbon.emoji,
-      bg:       selectedRibbon.color.bg,
-      border:   selectedRibbon.color.border,
+      message:   input.trim(),
+      nickname:  playerInfo?.nickname?.trim() || '익명',
+      emoji:     selectedRibbon.emoji,
+      bg:        selectedRibbon.color.bg,
+      border:    selectedRibbon.color.border,
+      createdAt: Timestamp.fromDate(now),
     };
 
-    const { data, error } = await supabase
-      .from('guestbook')
-      .insert(payload)
-      .select('id, message, nickname, emoji, bg, border, created_at')
-      .single();
-
-    if (!error && data) {
+    try {
+      const docRef = await addDoc(collection(db, 'guestbook'), payload);
       setMessages((prev) => [{
-        id:       data.id,
-        message:  data.message,
-        nickname: data.nickname ?? '익명',
-        emoji:    data.emoji,
-        color:    { bg: data.bg, border: data.border },
-        date:     data.created_at.slice(0, 10).replace(/-/g, '.'),
+        id:       docRef.id,
+        message:  payload.message,
+        nickname: payload.nickname,
+        emoji:    payload.emoji,
+        color:    { bg: payload.bg, border: payload.border },
+        date:     now.toISOString().slice(0, 10).replace(/-/g, '.'),
       }, ...prev]);
+    } catch {
+      // 저장 실패 시 조용히 무시 (기존 동작과 동일)
     }
 
     setInput('');

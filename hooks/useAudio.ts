@@ -1,6 +1,6 @@
 'use client';
 
-import { useRef, useCallback, useEffect } from 'react';
+import { useCallback } from 'react';
 
 interface AudioOptions {
   volume?: number;
@@ -10,33 +10,33 @@ interface AudioOptions {
 // Global audio registry (singleton across components)
 const audioInstances: Map<string, HTMLAudioElement> = new Map();
 
-export function useAudio() {
-  const bgmRef = useRef<HTMLAudioElement | null>(null);
+// BGM은 여러 컴포넌트(입장화면, 주크박스 등)에서 같은 트랙 하나를 공유 재생해야 하므로
+// 훅 인스턴스별 ref가 아닌 모듈 스코프 싱글턴으로 관리한다.
+let bgmAudio: HTMLAudioElement | null = null;
 
+export function useAudio() {
   const playBGM = useCallback((src: string, options: AudioOptions = {}) => {
-    if (bgmRef.current) {
-      bgmRef.current.pause();
-    }
+    bgmAudio?.pause();
     const audio = new Audio(src);
     audio.loop = options.loop ?? true;
     audio.volume = options.volume ?? 0.4;
     audio.play().catch(() => {
       // Autoplay blocked — user interaction required (expected on first load)
     });
-    bgmRef.current = audio;
+    bgmAudio = audio;
   }, []);
 
   const stopBGM = useCallback(() => {
-    bgmRef.current?.pause();
-    bgmRef.current = null;
+    bgmAudio?.pause();
+    bgmAudio = null;
   }, []);
 
   const toggleBGM = useCallback(() => {
-    if (!bgmRef.current) return;
-    if (bgmRef.current.paused) {
-      bgmRef.current.play().catch(() => {});
+    if (!bgmAudio) return;
+    if (bgmAudio.paused) {
+      bgmAudio.play().catch(() => {});
     } else {
-      bgmRef.current.pause();
+      bgmAudio.pause();
     }
   }, []);
 
@@ -50,13 +50,6 @@ export function useAudio() {
     audio.volume = options.volume ?? 0.6;
     audio.currentTime = 0;
     audio.play().catch(() => {});
-  }, []);
-
-  // Cleanup BGM on unmount
-  useEffect(() => {
-    return () => {
-      bgmRef.current?.pause();
-    };
   }, []);
 
   return { playBGM, stopBGM, toggleBGM, playSFX };

@@ -3,91 +3,94 @@
 import { useRef, useState, useEffect, useCallback } from 'react';
 import { useCafeStore } from '@/store/cafeStore';
 import { Modal } from '@/components/ui/Modal';
-import { BIRTHDAY_NAME } from '@/data/config';
 
-function drawPhotoCard(canvas: HTMLCanvasElement, nickname: string, gender: 'male' | 'female') {
-  const ctx = canvas.getContext('2d');
-  if (!ctx) return;
-  const W = canvas.width;
-  const H = canvas.height;
+const CAPTURE_SIZE = 640;
+const FRAME_SRC = '/frames/photobooth-frame.png';
+const MIRROR = true; // 셀카처럼 좌우 반전해서 촬영/저장
 
-  // 배경
-  const bg = ctx.createLinearGradient(0, 0, W, H);
-  bg.addColorStop(0, gender === 'female' ? '#fce7f3' : '#e0f2fe');
-  bg.addColorStop(1, gender === 'female' ? '#fbcfe8' : '#bae6fd');
-  ctx.fillStyle = bg;
-  ctx.fillRect(0, 0, W, H);
-
-  // 픽셀 테두리 (바깥)
-  ctx.strokeStyle = '#3d2310';
-  ctx.lineWidth = 8;
-  ctx.strokeRect(8, 8, W - 16, H - 16);
-  ctx.strokeStyle = gender === 'female' ? '#f9a8d4' : '#7dd3fc';
-  ctx.lineWidth = 3;
-  ctx.strokeRect(16, 16, W - 32, H - 32);
-
-  // 타이틀
-  ctx.fillStyle = '#3d2310';
-  ctx.font = 'bold 16px monospace';
-  ctx.textAlign = 'center';
-  ctx.fillText('✦ 0719 PIXEL CAFE ✦', W / 2, 56);
-
-  // 캐릭터
-  ctx.fillStyle = 'rgba(255,255,255,0.45)';
-  ctx.fillRect(W / 2 - 48, 74, 96, 96);
-  ctx.strokeStyle = '#3d2310';
-  ctx.lineWidth = 3;
-  ctx.strokeRect(W / 2 - 48, 74, 96, 96);
-  ctx.font = '64px serif';
-  ctx.fillText('🐱', W / 2, 152);
-
-  // 닉네임
-  ctx.fillStyle = '#3d2310';
-  ctx.font = 'bold 20px monospace';
-  ctx.fillText(nickname, W / 2, 200);
-
-  // 구분선
-  ctx.strokeStyle = '#3d2310';
-  ctx.lineWidth = 3;
-  ctx.beginPath();
-  ctx.moveTo(40, 214); ctx.lineTo(W - 40, 214);
-  ctx.stroke();
-
-  // 방문 정보
-  const dateStr = new Date().toLocaleDateString('ko-KR', { year: 'numeric', month: 'long', day: 'numeric' });
-  ctx.fillStyle = '#6b4423';
-  ctx.font = '13px monospace';
-  ctx.fillText(`${BIRTHDAY_NAME}의 생일 카페 방문`, W / 2, 240);
-  ctx.font = '12px monospace';
-  ctx.fillStyle = '#8a6040';
-  ctx.fillText(dateStr, W / 2, 260);
-
-  // 하단 픽셀 도트
-  ctx.fillStyle = '#3d2310';
-  for (let i = 0; i < 5; i++) {
-    ctx.fillRect(W / 2 - 32 + i * 16, 288, 8, 8);
-  }
-}
+type BoothState = 'idle' | 'requesting' | 'live' | 'captured' | 'error';
 
 export function PhotoBoothModal() {
   const activeModal = useCafeStore((s) => s.activeModal);
   const playerInfo  = useCafeStore((s) => s.playerInfo);
+  const videoRef    = useRef<HTMLVideoElement>(null);
   const canvasRef   = useRef<HTMLCanvasElement>(null);
-  const [ready, setReady] = useState(false);
+  const streamRef   = useRef<MediaStream | null>(null);
+  const [state, setState] = useState<BoothState>('idle');
+  const [errorMsg, setErrorMsg] = useState('');
 
-  const draw = useCallback(() => {
-    const canvas = canvasRef.current;
-    if (!canvas || !playerInfo) return;
-    drawPhotoCard(canvas, playerInfo.nickname, playerInfo.gender);
-    setReady(true);
-  }, [playerInfo]);
+  const stopStream = useCallback(() => {
+    streamRef.current?.getTracks().forEach((t) => t.stop());
+    streamRef.current = null;
+  }, []);
+
+  const startCamera = useCallback(async () => {
+    setState('requesting');
+    setErrorMsg('');
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({
+        video: { facingMode: 'user', width: { ideal: CAPTURE_SIZE }, height: { ideal: CAPTURE_SIZE } },
+        audio: false,
+      });
+      streamRef.current = stream;
+      if (videoRef.current) {
+        videoRef.current.srcObject = stream;
+        await videoRef.current.play();
+      }
+      setState('live');
+    } catch {
+      setErrorMsg('카메라를 사용할 수 없어요. 브라우저 권한을 확인해주세요.');
+      setState('error');
+    }
+  }, []);
 
   useEffect(() => {
     if (activeModal === 'photobooth') {
-      setReady(false);
-      requestAnimationFrame(draw);
+      startCamera();
+    } else {
+      stopStream();
+      setState('idle');
     }
-  }, [activeModal, draw]);
+    return () => stopStream();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [activeModal]);
+
+  const capture = useCallback(() => {
+    const video = videoRef.current;
+    const canvas = canvasRef.current;
+    if (!video || !canvas) return;
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return;
+
+    canvas.width = CAPTURE_SIZE;
+    canvas.height = CAPTURE_SIZE;
+
+    // 비디오 중앙을 정사각형으로 크롭
+    const vw = video.videoWidth;
+    const vh = video.videoHeight;
+    const side = Math.min(vw, vh);
+    const sx = (vw - side) / 2;
+    const sy = (vh - side) / 2;
+
+    ctx.save();
+    if (MIRROR) {
+      ctx.translate(CAPTURE_SIZE, 0);
+      ctx.scale(-1, 1);
+    }
+    ctx.drawImage(video, sx, sy, side, side, 0, 0, CAPTURE_SIZE, CAPTURE_SIZE);
+    ctx.restore();
+
+    stopStream();
+
+    // 프레임을 사진 위에 합성 (제작한 프레임 PNG는 투명 영역이 있어야 함)
+    const frame = new Image();
+    frame.onload = () => {
+      ctx.drawImage(frame, 0, 0, CAPTURE_SIZE, CAPTURE_SIZE);
+      setState('captured');
+    };
+    frame.onerror = () => setState('captured');
+    frame.src = FRAME_SRC;
+  }, [stopStream]);
 
   const download = () => {
     const canvas = canvasRef.current;
@@ -102,30 +105,73 @@ export function PhotoBoothModal() {
     <Modal isOpen={activeModal === 'photobooth'} maxWidth="max-w-xs">
       <div className="p-5 text-center">
         <h2 className="font-bold mb-1" style={{ fontSize: '0.8rem', color: '#3d2310' }}>★ 포토부스 ★</h2>
-        <p style={{ fontSize: '0.65rem', color: '#6b4423', marginBottom: '1rem' }}>방문 기념 포토카드를 저장하세요!</p>
+        <p style={{ fontSize: '0.65rem', color: '#6b4423', marginBottom: '1rem' }}>
+          {state === 'captured' ? '방문 기념 포토카드를 저장하세요!' : '프레임 안에 얼굴을 맞추고 촬영하세요!'}
+        </p>
 
-        <div className="flex justify-center mb-4">
-          <canvas
-            ref={canvasRef}
-            width={320}
-            height={320}
-            className="pixel-crisp"
+        <div
+          className="relative mx-auto mb-4 overflow-hidden"
+          style={{
+            width: '100%', maxWidth: '220px', aspectRatio: '1 / 1',
+            border: '4px solid #3d2310',
+            boxShadow: '4px 4px 0 rgba(0,0,0,0.4)',
+            background: '#000',
+          }}
+        >
+          <video
+            ref={videoRef}
+            playsInline
+            muted
+            className="absolute inset-0 w-full h-full object-cover"
             style={{
-              width: '100%', maxWidth: '220px',
-              border: '4px solid #3d2310',
-              boxShadow: '4px 4px 0 rgba(0,0,0,0.4)',
-              imageRendering: 'pixelated',
+              display: state === 'live' || state === 'requesting' ? 'block' : 'none',
+              transform: MIRROR ? 'scaleX(-1)' : 'none',
             }}
           />
+          {(state === 'live' || state === 'requesting') && (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img
+              src={FRAME_SRC}
+              alt=""
+              className="absolute inset-0 w-full h-full pointer-events-none object-cover"
+              onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}
+            />
+          )}
+          <canvas
+            ref={canvasRef}
+            className="pixel-crisp absolute inset-0 w-full h-full"
+            style={{ display: state === 'captured' ? 'block' : 'none', imageRendering: 'pixelated' }}
+          />
+          {state === 'requesting' && (
+            <div className="absolute inset-0 flex items-center justify-center" style={{ color: '#fff', fontSize: '0.65rem' }}>
+              카메라 준비 중...
+            </div>
+          )}
+          {state === 'error' && (
+            <div className="absolute inset-0 flex items-center justify-center text-center px-3" style={{ color: '#fff', fontSize: '0.6rem' }}>
+              {errorMsg}
+            </div>
+          )}
         </div>
 
-        <button
-          onClick={download}
-          disabled={!ready}
-          className="px-btn px-btn-amber w-full"
-        >
-          {ready ? '💾 PNG 저장' : '생성 중...'}
-        </button>
+        {state === 'error' && (
+          <button onClick={startCamera} className="px-btn px-btn-amber w-full">
+            다시 시도
+          </button>
+        )}
+
+        {state === 'live' && (
+          <button onClick={capture} className="px-btn px-btn-amber w-full">
+            📸 촬영하기
+          </button>
+        )}
+
+        {state === 'captured' && (
+          <div className="flex gap-2">
+            <button onClick={startCamera} className="px-btn w-1/2">다시 찍기</button>
+            <button onClick={download} className="px-btn px-btn-amber w-1/2">💾 PNG 저장</button>
+          </div>
+        )}
       </div>
     </Modal>
   );

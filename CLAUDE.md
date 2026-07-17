@@ -20,7 +20,7 @@
 | counter | (3,1) | receipt | 영수증 스타일 축하 카드 |
 | tree | (2,7) | guestbook | 방명록 (리본 달기) |
 | cake | (4,4) | candle | 마이크로 촛불 불기 (Web Audio) |
-| goods | (13-15,4) | goods | 가상 굿즈 구경 |
+| goods | (13-15,4) | goods | 굿즈 전시대 구경 (클릭 시 확인 후 닫힘) |
 | billboard | (12-16,1) | billboard | D-day 카운트다운 |
 | npc (counter staff) | (0,1) | npc | 카운터 직원 민준 대사 |
 | jukebox | (17,6) | jukebox | BGM 선택 플레이어 |

@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react';
 import { useCafeStore } from '@/store/cafeStore';
 import { Modal } from '@/components/ui/Modal';
-import { BIRTHDAY_DATE, BIRTHDAY_NAME } from '@/data/config';
+import { BIRTHDAY_NAME, isBirthdayToday, getNextBirthdayDate } from '@/data/config';
 
 interface TimeLeft {
   days: number;
@@ -11,18 +11,23 @@ interface TimeLeft {
   minutes: number;
   seconds: number;
   isBirthday: boolean;
+  targetDate: Date;
 }
 
 function getTimeLeft(): TimeLeft {
-  const now  = new Date();
-  const diff = BIRTHDAY_DATE.getTime() - now.getTime();
-  if (diff <= 0) return { days: 0, hours: 0, minutes: 0, seconds: 0, isBirthday: true };
+  const now = new Date();
+  if (isBirthdayToday(now)) {
+    return { days: 0, hours: 0, minutes: 0, seconds: 0, isBirthday: true, targetDate: now };
+  }
+  const targetDate = getNextBirthdayDate(now);
+  const diff = targetDate.getTime() - now.getTime();
   return {
     days:    Math.floor(diff / (1000 * 60 * 60 * 24)),
     hours:   Math.floor((diff / (1000 * 60 * 60)) % 24),
     minutes: Math.floor((diff / (1000 * 60)) % 60),
     seconds: Math.floor((diff / 1000) % 60),
     isBirthday: false,
+    targetDate,
   };
 }
 
@@ -67,7 +72,7 @@ export function BillboardModal() {
       >
         <div style={{ width: '2rem' }} />
         <span className="font-pixel" style={{ fontSize: '0.5rem', color: '#1a0e00', letterSpacing: '0.15em' }}>
-          ★ 0719 PIXEL CAFE ★
+          NAMIDEW VALLY
         </span>
         <button
           onClick={closeModal}
@@ -108,7 +113,7 @@ export function BillboardModal() {
             </div>
 
             <p style={{ fontSize: '0.55rem', color: '#8a6040' }}>
-              {BIRTHDAY_DATE.toLocaleDateString('ko-KR', { year: 'numeric', month: 'long', day: 'numeric' })}
+              {timeLeft.targetDate.toLocaleDateString('ko-KR', { year: 'numeric', month: 'long', day: 'numeric' })}
             </p>
           </div>
         )}

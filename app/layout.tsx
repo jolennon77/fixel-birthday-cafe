@@ -9,8 +9,8 @@ const pixelFont = Press_Start_2P({
 });
 
 export const metadata: Metadata = {
-  title: '0719 Pixel Cafe ☕',
-  description: '나미의 생일 카페에 오신 걸 환영해요!',
+  title: 'NAMIDEW VALLY',
+  description: 'NAMIDEW VALLY!',
 };
 
 export const viewport: Viewport = {

@@ -1,22 +1,24 @@
 'use client';
 
 import { useState } from 'react';
+import Image from 'next/image';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useCafeStore } from '@/store/cafeStore';
+import { useAudio } from '@/hooks/useAudio';
 import type { CharacterGender } from '@/types';
-import { BIRTHDAY_NAME } from '@/data/config';
+import { BIRTHDAY_NAME, BGM_TRACKS, getDefaultBgmId } from '@/data/config';
 
-const CHARACTERS: { gender: CharacterGender; emoji: string; label: string; color: string; bg: string }[] = [
+const CHARACTERS: { gender: CharacterGender; image: string; label: string; color: string; bg: string }[] = [
   {
     gender: 'male',
-    emoji: '🐱',
+    image: '/male_profile.png',
     label: '남자',
     color: 'border-sky-400 bg-sky-50',
     bg: 'from-sky-400 to-blue-500',
   },
   {
     gender: 'female',
-    emoji: '🐱',
+    image: '/female_profile.png',
     label: '여자',
     color: 'border-pink-400 bg-pink-50',
     bg: 'from-pink-400 to-rose-500',
@@ -25,6 +27,8 @@ const CHARACTERS: { gender: CharacterGender; emoji: string; label: string; color
 
 export function EntranceScreen() {
   const setPlayerInfo = useCafeStore((s) => s.setPlayerInfo);
+  const setCurrentBgm = useCafeStore((s) => s.setCurrentBgm);
+  const { playBGM } = useAudio();
   const [selected, setSelected] = useState<CharacterGender | null>(null);
   const [nickname, setNickname] = useState('');
   const [entering, setEntering] = useState(false);
@@ -34,6 +38,14 @@ export function EntranceScreen() {
   const handleEnter = () => {
     if (!canEnter || entering) return;
     setEntering(true);
+
+    // 클릭(사용자 제스처) 시점에 바로 재생해야 브라우저 자동재생 정책에 걸리지 않는다.
+    const defaultTrack = BGM_TRACKS.find((t) => t.id === getDefaultBgmId());
+    if (defaultTrack) {
+      playBGM(defaultTrack.src, { loop: true, volume: 0.35 });
+      setCurrentBgm(defaultTrack.id);
+    }
+
     setTimeout(() => {
       setPlayerInfo({ nickname: nickname.trim(), gender: selected! });
     }, 600);
@@ -44,7 +56,11 @@ export function EntranceScreen() {
       {!entering ? (
         <motion.div
           key="entrance"
-          className="fixed inset-0 bg-stone-900 flex flex-col items-center justify-center p-6 z-50"
+          className="fixed inset-0 bg-stone-900 bg-cover bg-center flex flex-col items-center justify-center p-6 z-50"
+          style={{
+            backgroundImage:
+              "linear-gradient(rgba(28,25,23,0.55), rgba(28,25,23,0.55)), url('/bg.png')",
+          }}
           exit={{ opacity: 0, scale: 1.05 }}
           transition={{ duration: 0.5 }}
         >
@@ -55,12 +71,14 @@ export function EntranceScreen() {
             transition={{ delay: 0.1 }}
             className="text-center mb-8"
           >
-            <p className="text-amber-400 text-xs font-pixel mb-2 tracking-widest">
-              ☕ WELCOME TO
-            </p>
-            <h1 className="text-white text-2xl sm:text-3xl font-pixel leading-tight">
-              0719<br />PIXEL CAFE
-            </h1>
+            <Image
+              src="/logo.png"
+              alt="나미듀밸리"
+              width={400}
+              height={220}
+              priority
+              className="w-64 sm:w-80 h-auto mx-auto pixel-crisp"
+            />
             <p className="text-stone-400 text-xs mt-3">
               {BIRTHDAY_NAME}의 생일 카페에 오신 걸 환영해요
             </p>
@@ -87,16 +105,13 @@ export function EntranceScreen() {
                       : 'border-stone-600 bg-stone-800 hover:border-stone-400',
                   ].join(' ')}
                 >
-                  <span
-                    className="text-4xl"
-                    style={
-                      c.gender === 'female'
-                        ? { filter: 'hue-rotate(280deg) saturate(2)' }
-                        : undefined
-                    }
-                  >
-                    {c.emoji}
-                  </span>
+                  <Image
+                    src={c.image}
+                    alt={c.label}
+                    width={64}
+                    height={64}
+                    className="w-12 h-12 pixel-crisp"
+                  />
                   <span className="text-xs text-stone-300 font-medium">{c.label}</span>
                   {selected === c.gender && (
                     <span className="text-[10px] text-stone-500">✓ 선택됨</span>
