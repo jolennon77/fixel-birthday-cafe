@@ -54,7 +54,6 @@ export function Character({ position, direction, tileSize, gender }: CharacterPr
         height={SPRITE_H}
         style={{
           imageRendering: 'pixelated',
-          marginBottom: -(SPRITE_H - tileSize),
         }}
         priority
         unoptimized

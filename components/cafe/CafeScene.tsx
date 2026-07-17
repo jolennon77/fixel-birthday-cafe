@@ -30,6 +30,9 @@ function useTileSize() {
   //  서로 달라질 수 있고, 그 오차가 스크롤 중심 계산에 그대로 반영돼 화면이
   //  타일 하나 정도 밀려 보이는 원인이었다.)
   const [viewport, setViewport] = useState({ width: 0, height: 0 });
+  // 화면 전체(바깥 래퍼)도 CSS vw/vh 대신 JS로 측정한 값을 그대로 써서,
+  // 바깥 래퍼(100vh)와 안쪽 뷰포트가 서로 다른 기준으로 어긋나는 일이 없게 한다.
+  const [screenSize, setScreenSize] = useState({ width: 0, height: 0 });
 
   useEffect(() => {
     const calc = () => {
@@ -39,6 +42,7 @@ function useTileSize() {
       const landscape = vw > vh;
       setIsMobile(mobile);
       setIsLandscape(landscape);
+      setScreenSize({ width: vw, height: vh });
 
       const dpadReserve = mobile ? (landscape ? 16 : 160) : 0;
       const availableH  = vh - dpadReserve;
@@ -59,13 +63,13 @@ function useTileSize() {
     return () => window.removeEventListener('resize', calc);
   }, []);
 
-  return { tileSize, isMobile, isLandscape, viewport };
+  return { tileSize, isMobile, isLandscape, viewport, screenSize };
 }
 
 export function CafeScene() {
   const { position, direction, activeModal, move, triggerInteraction, playerInfo } =
     useCafeStore();
-  const { tileSize, isMobile, viewport } = useTileSize();
+  const { tileSize, isMobile, viewport, screenSize } = useTileSize();
   const viewportRef = useRef<HTMLDivElement>(null);
 
   useKeyboard({
@@ -94,7 +98,13 @@ export function CafeScene() {
   const mapHeight = MAP_ROWS * tileSize;
 
   return (
-    <div className="relative w-screen h-screen bg-stone-900 overflow-hidden flex items-center justify-center">
+    <div
+      className="relative bg-stone-900 overflow-hidden flex items-start justify-center"
+      style={{
+        width:  screenSize.width  ? `${screenSize.width}px`  : '100vw',
+        height: screenSize.height ? `${screenSize.height}px` : '100vh',
+      }}
+    >
       <div
         ref={viewportRef}
         className="relative overflow-hidden"
