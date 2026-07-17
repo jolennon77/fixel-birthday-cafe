@@ -14,7 +14,7 @@ type Phase = 'idle' | 'listening' | 'blown' | 'denied';
 // 그래서 전체 음량이 아니라 "고주파 대역 에너지"만 따로 뽑아서 판정한다.
 const BLOW_FREQ_LOW_HZ  = 1000; // 이 대역 아래는 목소리 기본 주파수/배음이 많아 제외
 const BLOW_FREQ_HIGH_HZ = 8000;
-const BLOW_THRESHOLD    = 0.10; // 고주파 대역 평균 (0~1 정규화)
+const BLOW_THRESHOLD    = 0.05; // 고주파 대역 평균 (0~1 정규화)
 const BLOW_SUSTAIN_MS   = 500;
 
 export function CandleModal() {
