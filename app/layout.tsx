@@ -9,8 +9,8 @@ const pixelFont = Press_Start_2P({
 });
 
 export const metadata: Metadata = {
-  title: 'NAMIDEW VALLY',
-  description: 'NAMIDEW VALLY!',
+  title: 'NAMIDEW VALLEY',
+  description: 'NAMIDEW VALLEY!',
 };
 
 export const viewport: Viewport = {

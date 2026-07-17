@@ -72,7 +72,7 @@ export function BillboardModal() {
       >
         <div style={{ width: '2rem' }} />
         <span className="font-pixel" style={{ fontSize: '0.5rem', color: '#1a0e00', letterSpacing: '0.15em' }}>
-          NAMIDEW VALLY
+          NAMIDEW VALLEY
         </span>
         <button
           onClick={closeModal}
