@@ -30,9 +30,9 @@ export const GACHA_MESSAGES = [
 
 // ── 굿즈 전시대 ───────────────────────────────────────
 export const GOODS_DISPLAY = [
-  { id: 'goods1', name: '손가락 깨무는 몬치치', image: '/goods/goods_1.png' },
-  { id: 'goods2', name: '클래식 몬치치 (블루 캡)', image: '/goods/goods_2.png' },
-  { id: 'goods3', name: '클래식 몬치치 (레드 반다나)', image: '/goods/goods_3.png' },
+  { id: 'goods1', name: '손가락 깨무는 몬치치', image: '/goods/goods_1.webp' },
+  { id: 'goods2', name: '클래식 몬치치 (블루 캡)', image: '/goods/goods_2.webp' },
+  { id: 'goods3', name: '클래식 몬치치 (레드 반다나)', image: '/goods/goods_3.webp' },
 ];
 
 // ── 카페 메뉴 ───────────────────────────────────────

@@ -12,7 +12,7 @@ export function TileMap({ tileSize }: TileMapProps) {
     <div
       className="relative"
       style={{
-        backgroundImage:     'url(/cafe-bg.png)',
+        backgroundImage:     'url(/cafe-bg.webp)',
         backgroundSize:      '100% 100%',
         backgroundRepeat:    'no-repeat',
         imageRendering:      'pixelated',

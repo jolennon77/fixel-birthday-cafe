@@ -59,7 +59,7 @@ export function EntranceScreen() {
           className="fixed inset-0 bg-stone-900 bg-cover bg-center flex flex-col items-center justify-center p-6 z-50"
           style={{
             backgroundImage:
-              "linear-gradient(rgba(28,25,23,0.55), rgba(28,25,23,0.55)), url('/bg.png')",
+              "linear-gradient(rgba(28,25,23,0.55), rgba(28,25,23,0.55)), url('/bg.webp')",
           }}
           exit={{ opacity: 0, scale: 1.05 }}
           transition={{ duration: 0.5 }}
