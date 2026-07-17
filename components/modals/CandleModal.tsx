@@ -9,8 +9,13 @@ import { useAudio } from '@/hooks/useAudio';
 
 type Phase = 'idle' | 'listening' | 'blown' | 'denied';
 
-const BLOW_THRESHOLD  = 0.07;
-const BLOW_SUSTAIN_MS = 600;
+// "후~" 하고 부는 바람 소리는 특정 톤 없이 넓은 대역에 걸친 잡음(turbulence)이라
+// 저음 위주인 목소리("아~")보다 시간축 RMS 진폭 자체는 오히려 작게 잡힌다.
+// 그래서 전체 음량이 아니라 "고주파 대역 에너지"만 따로 뽑아서 판정한다.
+const BLOW_FREQ_LOW_HZ  = 1000; // 이 대역 아래는 목소리 기본 주파수/배음이 많아 제외
+const BLOW_FREQ_HIGH_HZ = 8000;
+const BLOW_THRESHOLD    = 0.10; // 고주파 대역 평균 (0~1 정규화)
+const BLOW_SUSTAIN_MS   = 500;
 
 export function CandleModal() {
   const activeModal = useCafeStore((s) => s.activeModal);
@@ -45,7 +50,9 @@ export function CandleModal() {
       pauseBGM();
       const stream = await navigator.mediaDevices.getUserMedia({
         audio: {
-          echoCancellation: true,
+          // BGM은 마이크 켜는 동안 이미 꺼두기 때문에 에코 캔슬링이 굳이 필요 없고,
+          // 오히려 브로드밴드 잡음(=바람 소리)을 에코 아티팩트로 오인해 깎아낼 수 있어 끈다.
+          echoCancellation: false,
           // 노이즈 억제/자동 게인이 숨을 부는 약한 소리를 "잡음"으로 판단해 깎아버리는 경우가 많아 꺼둔다.
           noiseSuppression: false,
           autoGainControl: false,
@@ -54,7 +61,7 @@ export function CandleModal() {
       const ctx      = new AudioContext();
       const source   = ctx.createMediaStreamSource(stream);
       const analyser = ctx.createAnalyser();
-      analyser.fftSize = 256;
+      analyser.fftSize = 1024;
       source.connect(analyser);
 
       streamRef.current   = stream;
@@ -62,15 +69,19 @@ export function CandleModal() {
       analyserRef.current = analyser;
       setPhase('listening');
 
-      const buf = new Float32Array(analyser.fftSize);
-      const tick = () => {
-        analyser.getFloatTimeDomainData(buf);
-        let sum = 0;
-        for (const v of buf) sum += v * v;
-        const rms = Math.sqrt(sum / buf.length);
-        setVolume(rms);
+      const freqData  = new Uint8Array(analyser.frequencyBinCount);
+      const binHz      = ctx.sampleRate / analyser.fftSize;
+      const bandStart  = Math.max(1, Math.round(BLOW_FREQ_LOW_HZ / binHz));
+      const bandEnd    = Math.min(freqData.length - 1, Math.round(BLOW_FREQ_HIGH_HZ / binHz));
 
-        if (rms > BLOW_THRESHOLD) {
+      const tick = () => {
+        analyser.getByteFrequencyData(freqData);
+        let sum = 0;
+        for (let i = bandStart; i <= bandEnd; i++) sum += freqData[i];
+        const highBandLevel = sum / (bandEnd - bandStart + 1) / 255; // 0~1 정규화
+        setVolume(highBandLevel);
+
+        if (highBandLevel > BLOW_THRESHOLD) {
           setFlicker(true);
           if (blowStartRef.current === null) blowStartRef.current = Date.now();
           else if (Date.now() - blowStartRef.current >= BLOW_SUSTAIN_MS) {
