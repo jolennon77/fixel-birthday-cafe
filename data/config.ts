@@ -52,9 +52,9 @@ export const CAFE_MENU = [
 
 // ── BGM 트랙 ────────────────────────────────────────
 export const BGM_TRACKS = [
-  { id: 'cafe',     label: '카페 재즈',     src: '/audio/bgm-cafe.mp3',     emoji: '🎷' },
-  { id: 'birthday', label: '생일 축하',     src: '/audio/bgm-birthday.mp3', emoji: '🎂' },
-  { id: 'chill',    label: '잔잔한 밤',     src: '/audio/bgm-chill.mp3',    emoji: '🌙' },
+  { id: 'cafe',     label: 'Cafe-Jazz',     src: '/audio/bgm-cafe.mp3',     emoji: '🎷' },
+  { id: 'birthday', label: 'Happy-Birthday',     src: '/audio/bgm-birthday.mp3', emoji: '🎂' },
+  { id: 'chill',    label: 'Chill-Night',     src: '/audio/bgm-chill.mp3',    emoji: '🌙' },
 ];
 
 // 평소 기본 BGM (BGM_TRACKS의 id 중 하나, null이면 자동재생 안 함)

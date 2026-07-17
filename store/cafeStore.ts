@@ -1,7 +1,6 @@
 'use client';
 
 import { create } from 'zustand';
-import { persist } from 'zustand/middleware';
 import type { Direction, ModalType, ObjectType, Position, PlayerInfo, AmbientNpcConfig } from '@/types';
 import { MAP_LAYOUT, TILE_OBJECTS, PLAYER_START, MAP_COLS, MAP_ROWS } from '@/data/mapLayout';
 import { AMBIENT_NPC_CONFIGS } from '@/data/ambientNpcs';
@@ -82,90 +81,82 @@ const MODAL_MAP: Record<string, NonNullable<ModalType>> = {
   billboard:   'billboard',
 };
 
-export const useCafeStore = create<CafeState>()(
-  persist(
-    (set, get) => ({
-      playerInfo: null,
-      setPlayerInfo: (info) => set({ playerInfo: info }),
+export const useCafeStore = create<CafeState>()((set, get) => ({
+  playerInfo: null,
+  setPlayerInfo: (info) => set({ playerInfo: info }),
 
-      position: PLAYER_START,
-      direction: 'down',
-      isMoving: false,
-      nearbyObject: getNearbyObject(PLAYER_START),
-      nearbyNpc: null,
-      activeBubbleNpcId: null,
-      activeModal: null,
-      candleBlown: false,
-      currentBgmId: null,
-      npcPositions: {},
+  position: PLAYER_START,
+  direction: 'down',
+  isMoving: false,
+  nearbyObject: getNearbyObject(PLAYER_START),
+  nearbyNpc: null,
+  activeBubbleNpcId: null,
+  activeModal: null,
+  candleBlown: false,
+  currentBgmId: null,
+  npcPositions: {},
 
-      move: (dir: Direction) => {
-        const { position, npcPositions } = get();
-        const delta: Record<Direction, Position> = {
-          up:    { x: 0,  y: -1 },
-          down:  { x: 0,  y:  1 },
-          left:  { x: -1, y:  0 },
-          right: { x:  1, y:  0 },
-        };
-        const next = {
-          x: position.x + delta[dir].x,
-          y: position.y + delta[dir].y,
-        };
-        const npcBlocking = Object.values(npcPositions).some(
-          (p) => p.x === next.x && p.y === next.y
-        );
-        if (!isWalkable(next.x, next.y) || npcBlocking) {
-          set({ direction: dir });
-          return;
-        }
-        set({
-          position:     next,
-          direction:    dir,
-          isMoving:     true,
-          nearbyObject: getNearbyObject(next),
-          nearbyNpc:    getNearbyNpc(next, npcPositions),
-          activeBubbleNpcId: null, // 이동하면 말풍선 닫기
-        });
-      },
-
-      setMoving: (moving) => set({ isMoving: moving }),
-      openModal: (modal) => set({ activeModal: modal }),
-      closeModal: () => set({ activeModal: null }),
-      blowCandle: () => set({ candleBlown: true }),
-      setCurrentBgm: (id) => set({ currentBgmId: id }),
-      closeBubble: () => set({ activeBubbleNpcId: null }),
-
-      triggerInteraction: () => {
-        const { nearbyNpc, nearbyObject, activeBubbleNpcId, openModal } = get();
-        // 말풍선이 열려있으면 닫기
-        if (activeBubbleNpcId) {
-          set({ activeBubbleNpcId: null });
-          return;
-        }
-        // 방문객 NPC 말풍선
-        if (nearbyNpc) {
-          set({ activeBubbleNpcId: nearbyNpc.id });
-          return;
-        }
-        if (nearbyObject) {
-          const modal = MODAL_MAP[nearbyObject.objectType];
-          if (modal) openModal(modal);
-        }
-      },
-
-      syncNpcPosition: (id, pos) => {
-        const prev = get().npcPositions;
-        const next = { ...prev, [id]: pos };
-        const nearbyNpc = getNearbyNpc(get().position, next);
-        set({ npcPositions: next, nearbyNpc });
-      },
-
-      resetPosition: () =>
-        set({ position: PLAYER_START, nearbyObject: getNearbyObject(PLAYER_START) }),
-    }),
-    {
-      name: 'cafe-player',
-      partialize: (state) => ({ playerInfo: state.playerInfo }),
+  move: (dir: Direction) => {
+    const { position, npcPositions } = get();
+    const delta: Record<Direction, Position> = {
+      up:    { x: 0,  y: -1 },
+      down:  { x: 0,  y:  1 },
+      left:  { x: -1, y:  0 },
+      right: { x:  1, y:  0 },
+    };
+    const next = {
+      x: position.x + delta[dir].x,
+      y: position.y + delta[dir].y,
+    };
+    const npcBlocking = Object.values(npcPositions).some(
+      (p) => p.x === next.x && p.y === next.y
+    );
+    if (!isWalkable(next.x, next.y) || npcBlocking) {
+      set({ direction: dir });
+      return;
     }
-  )
-);
+    set({
+      position:     next,
+      direction:    dir,
+      isMoving:     true,
+      nearbyObject: getNearbyObject(next),
+      nearbyNpc:    getNearbyNpc(next, npcPositions),
+      activeBubbleNpcId: null, // 이동하면 말풍선 닫기
+    });
+  },
+
+  setMoving: (moving) => set({ isMoving: moving }),
+  openModal: (modal) => set({ activeModal: modal }),
+  closeModal: () => set({ activeModal: null }),
+  blowCandle: () => set({ candleBlown: true }),
+  setCurrentBgm: (id) => set({ currentBgmId: id }),
+  closeBubble: () => set({ activeBubbleNpcId: null }),
+
+  triggerInteraction: () => {
+    const { nearbyNpc, nearbyObject, activeBubbleNpcId, openModal } = get();
+    // 말풍선이 열려있으면 닫기
+    if (activeBubbleNpcId) {
+      set({ activeBubbleNpcId: null });
+      return;
+    }
+    // 방문객 NPC 말풍선
+    if (nearbyNpc) {
+      set({ activeBubbleNpcId: nearbyNpc.id });
+      return;
+    }
+    if (nearbyObject) {
+      const modal = MODAL_MAP[nearbyObject.objectType];
+      if (modal) openModal(modal);
+    }
+  },
+
+  syncNpcPosition: (id, pos) => {
+    const prev = get().npcPositions;
+    const next = { ...prev, [id]: pos };
+    const nearbyNpc = getNearbyNpc(get().position, next);
+    set({ npcPositions: next, nearbyNpc });
+  },
+
+  resetPosition: () =>
+    set({ position: PLAYER_START, nearbyObject: getNearbyObject(PLAYER_START) }),
+}));
