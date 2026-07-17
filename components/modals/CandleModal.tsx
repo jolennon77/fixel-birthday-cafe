@@ -5,10 +5,11 @@ import { motion, AnimatePresence } from 'framer-motion';
 import Image from 'next/image';
 import { useCafeStore } from '@/store/cafeStore';
 import { Modal } from '@/components/ui/Modal';
+import { useAudio } from '@/hooks/useAudio';
 
 type Phase = 'idle' | 'listening' | 'blown' | 'denied';
 
-const BLOW_THRESHOLD  = 0.18;
+const BLOW_THRESHOLD  = 0.07;
 const BLOW_SUSTAIN_MS = 600;
 
 export function CandleModal() {
@@ -25,6 +26,7 @@ export function CandleModal() {
   const streamRef    = useRef<MediaStream | null>(null);
   const rafRef       = useRef<number>(0);
   const blowStartRef = useRef<number | null>(null);
+  const { pauseBGM, resumeBGM } = useAudio();
 
   const stopMic = useCallback(() => {
     cancelAnimationFrame(rafRef.current);
@@ -33,11 +35,22 @@ export function CandleModal() {
     streamRef.current   = null;
     audioCtxRef.current = null;
     analyserRef.current = null;
-  }, []);
+    resumeBGM();
+  }, [resumeBGM]);
 
   const startListening = useCallback(async () => {
     try {
-      const stream   = await navigator.mediaDevices.getUserMedia({ audio: true });
+      // BGM이 스피커로 흘러나오면 마이크가 같이 주워듣게 되어 바람 소리 인식을 방해하므로,
+      // 마이크를 켜는 동안은 BGM을 잠시 멈춘다 (stopMic에서 다시 재생).
+      pauseBGM();
+      const stream = await navigator.mediaDevices.getUserMedia({
+        audio: {
+          echoCancellation: true,
+          // 노이즈 억제/자동 게인이 숨을 부는 약한 소리를 "잡음"으로 판단해 깎아버리는 경우가 많아 꺼둔다.
+          noiseSuppression: false,
+          autoGainControl: false,
+        },
+      });
       const ctx      = new AudioContext();
       const source   = ctx.createMediaStreamSource(stream);
       const analyser = ctx.createAnalyser();
@@ -75,9 +88,10 @@ export function CandleModal() {
       };
       rafRef.current = requestAnimationFrame(tick);
     } catch {
+      resumeBGM();
       setPhase('denied');
     }
-  }, [blowCandle, stopMic]);
+  }, [blowCandle, stopMic, pauseBGM, resumeBGM]);
 
   useEffect(() => {
     if (activeModal !== 'candle') {

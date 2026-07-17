@@ -31,6 +31,15 @@ export function useAudio() {
     bgmAudio = null;
   }, []);
 
+  // 트랙을 잃지 않고 잠시 멈췄다 이어서 재생할 때 사용 (예: 촛불 마이크 인식 중 BGM 간섭 방지)
+  const pauseBGM = useCallback(() => {
+    bgmAudio?.pause();
+  }, []);
+
+  const resumeBGM = useCallback(() => {
+    if (bgmAudio && bgmAudio.paused) bgmAudio.play().catch(() => {});
+  }, []);
+
   const toggleBGM = useCallback(() => {
     if (!bgmAudio) return;
     if (bgmAudio.paused) {
@@ -52,5 +61,5 @@ export function useAudio() {
     audio.play().catch(() => {});
   }, []);
 
-  return { playBGM, stopBGM, toggleBGM, playSFX };
+  return { playBGM, stopBGM, pauseBGM, resumeBGM, toggleBGM, playSFX };
 }
